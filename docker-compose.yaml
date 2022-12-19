@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  go:
+    image: auto-reply-bot-go
+    container_name: auto-reply-bot-go
+    build: .
+    volumes:
+      - "./:/go/src"
+    tty: true
+    restart: always
+    ports:
+      - "80:8080"
+      - "443:8080"

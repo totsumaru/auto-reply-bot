@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+  mysql:
+    build: .
+    image: auto-reply-bot-mysql
+    container_name: auto-reply-bot-mysql
+    environment:
+      - ENV
+      - TZ
+      - DB_HOST
+      - DB_PORT
+      - DB_NAME
+      - DB_USER_NAME
+      - DB_USER_PASSWORD
+      - MYSQL_ROOT_PASSWORD
+    volumes:
+      - ".:/working/.docker/mysql"
+    ports:
+      - "${DB_PORT}:3306"

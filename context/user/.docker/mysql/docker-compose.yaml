@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  mysql:
+    # カレントディレクトリのDockerfileをビルドします
+    build: .
+    # イメージ名を設定します
+    image: auto-reply-bot-mysql
+    # コンテナ名を設定します
+    container_name: auto-reply-bot-mysql
+    # ローカルの環境変数をコンテナに渡します
+    environment:
+      - ENV
+      - TZ
+      - DB_HOST
+      - DB_PORT
+      - DB_NAME
+      - DB_USER_NAME
+      - DB_USER_PASSWORD
+      - MYSQL_ROOT_PASSWORD
+    # カレントディレクトリの内容をコンテナにコピーします
+    volumes:
+      - ".:/working/.docker/mysql"
+    # ポートを設定します
+    ports:
+      - "${DB_PORT}:3306"
