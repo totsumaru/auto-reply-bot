@@ -2,15 +2,15 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/techstart35/auto-reply-bot/context/bff/api/user"
-	"github.com/techstart35/auto-reply-bot/context/bff/api/user/create"
+	"github.com/techstart35/auto-reply-bot/context/bff/api/server"
+	"github.com/techstart35/auto-reply-bot/context/bff/api/server/create"
 )
 
 // ルートを設定します
 func RegisterRouter(e *gin.Engine) {
 	Route(e)
-	user.User(e)
-	create.UserCreate(e)
+	server.Server(e)
+	create.ServerCreate(e)
 }
 
 // ルートです
