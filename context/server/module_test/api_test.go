@@ -18,8 +18,9 @@ import (
 // テスト用の値です
 var (
 	// 2022年5月5日 AM5:00
-	TestNow = time.Date(2022, time.Month(5), 5, 5, 0, 0, 0, time.Local)
-	TestID  = "984614055681613864" // `TestServer`のDiscordのサーバーID
+	TestNow         = time.Date(2022, time.Month(5), 5, 5, 0, 0, 0, time.Local)
+	TestID          = "984614055681613864" // `TestServer`のDiscordのサーバーID
+	TestAdminRoleID = "998800967665459240" // `TestServer`のAdminロールID
 )
 
 // セットアップ用関数
