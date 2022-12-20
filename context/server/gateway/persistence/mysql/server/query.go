@@ -84,6 +84,8 @@ func (q *Query) FindByID(id string) (map[string]interface{}, error) {
 }
 
 // 全てのサーバーを取得します
+//
+// 0件の場合は空のスライスを返します(エラーは返されません)
 func (q *Query) FindAll() ([]map[string]interface{}, error) {
 	qs := fmt.Sprintf(
 		`SELECT %s, %s, %s, %s FROM %s`,
