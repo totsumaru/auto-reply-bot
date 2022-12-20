@@ -96,11 +96,13 @@ func (b Block) MarshalJSON() ([]byte, error) {
 		Reply      []Reply   `json:"reply"`
 		IsAllMatch bool      `json:"is_all_match"`
 		IsRandom   bool      `json:"is_random"`
+		IsEmbed    bool      `json:"is_embed"`
 	}{
 		Keyword:    b.keyword,
 		Reply:      b.reply,
 		IsAllMatch: b.isAllMatch,
 		IsRandom:   b.isRandom,
+		IsEmbed:    b.isEmbed,
 	}
 
 	bb, err := json.Marshal(j)
@@ -118,6 +120,7 @@ func (b *Block) UnmarshalJSON(bb []byte) error {
 		Reply      []Reply   `json:"reply"`
 		IsAllMatch bool      `json:"is_all_match"`
 		IsRandom   bool      `json:"is_random"`
+		IsEmbed    bool      `json:"is_embed"`
 	}{}
 
 	if err := json.Unmarshal(bb, j); err != nil {
@@ -128,6 +131,7 @@ func (b *Block) UnmarshalJSON(bb []byte) error {
 	b.reply = j.Reply
 	b.isAllMatch = j.IsAllMatch
 	b.isRandom = j.IsRandom
+	b.isEmbed = j.IsEmbed
 
 	return nil
 }
