@@ -9,6 +9,20 @@
 | Dev   | botの開発者           |     | 
 | Admin | 各サーバーのbotの管理者ユーザー |     | 
 
+## botの導入URL
+
+[botの導入はこちら](https://discord.com/api/oauth2/authorize?client_id=1054635548142223400&permissions=412317207552&scope=bot)
+
+#### 権限
+
+- Read Messages/View Channels
+- Send Messages
+- Send Messages in Threads
+- Embed Links
+- Read Message History
+- Use External Emojis
+- Use External Stickers
+
 ## API
 
 ### 1. サーバーの情報を取得(Adminのみ)

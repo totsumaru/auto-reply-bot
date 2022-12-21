@@ -10,7 +10,7 @@ import (
 
 var (
 	NotFoundErr = fmt.Errorf("NorFoundErr")
-	ExpiredErr  = fmt.Errorf("ExpiredErr")
+	AuthErr     = fmt.Errorf("AuthErr")
 )
 
 // エラーをログ出力します

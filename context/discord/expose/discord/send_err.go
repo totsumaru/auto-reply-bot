@@ -7,7 +7,7 @@ import (
 )
 
 // エラーメッセージを送信します
-var SendErrMsg = func(s *discordgo.Session, e error) {
+func SendErrMsg(s *discordgo.Session, e error) {
 	// エラーメッセージを送信します
 	embedInfo := &discordgo.MessageEmbed{
 		Title:       "エラーが発生しました",
