@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
@@ -100,11 +101,12 @@ func getServer(c *gin.Context) {
 			return
 		}
 
-		if !ok {
-			discord.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"))
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
+		fmt.Println(ok)
+		//if !ok {
+		//	discord.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"))
+		//	c.JSON(http.StatusUnauthorized, "認証されていません")
+		//	return
+		//}
 	}
 
 	var (

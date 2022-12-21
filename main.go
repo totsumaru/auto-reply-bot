@@ -6,8 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/techstart35/auto-reply-bot/context/bff/api"
-	"github.com/techstart35/auto-reply-bot/context/bff/bot/guild_create"
-	"github.com/techstart35/auto-reply-bot/context/bff/bot/message_create"
+	"github.com/techstart35/auto-reply-bot/context/bff/bot/handler/guild_create"
+	"github.com/techstart35/auto-reply-bot/context/bff/bot/handler/interaction_create"
+	"github.com/techstart35/auto-reply-bot/context/bff/bot/handler/message_create"
 	"log"
 	"os"
 	"os/signal"
@@ -40,8 +41,9 @@ func main() {
 		}
 
 		//イベントハンドラを追加
-		session.AddHandler(message_create.TestHandler)
+		session.AddHandler(message_create.Handler)
 		session.AddHandler(guild_create.Handler)
+		session.AddHandler(interaction_create.Handler)
 
 		if err = session.Open(); err != nil {
 			log.Fatalln(err)
