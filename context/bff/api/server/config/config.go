@@ -1,4 +1,4 @@
-package server
+package config
 
 import (
 	"context"
@@ -10,9 +10,21 @@ import (
 	"net/http"
 )
 
-// サーバーを取得します
-func Server(e *gin.Engine) {
-	e.GET("/server", getServer)
+// サーバーの設定を更新します
+func ServerConfig(e *gin.Engine) {
+	e.POST("/server/config", postServerConfig)
+}
+
+// リクエストBodyです
+type ReqConfig struct {
+	AdminRoleID string `json:"admin_role_id"`
+	Block       []struct {
+		Keyword    []string `json:"keyword"`
+		Reply      []string `json:"reply"`
+		IsAllMatch bool     `json:"is_all_match"`
+		IsRandom   bool     `json:"is_random"`
+		IsEmbed    bool     `json:"is_embed"`
+	} `json:"block"`
 }
 
 // レスポンスです
@@ -31,8 +43,8 @@ type ResGetServerBlock struct {
 	IsEmbed    bool     `json:"is_embed"`
 }
 
-// サーバーを取得します
-func getServer(c *gin.Context) {
+// サーバーの設定を更新します
+func postServerConfig(c *gin.Context) {
 	session, err := discord.CreateSession()
 	if err != nil {
 		discord.SendErrMsg(session, err)
@@ -64,22 +76,11 @@ func getServer(c *gin.Context) {
 	ctx := context.WithValue(context.Background(), "tx", tx)
 
 	id := c.Query("id")
-	code := c.Query("code")
-
-	var (
-		token string
-	)
+	token := c.GetHeader("token")
 
 	// 認証されているユーザーかを検証します
 	{
 		tmpRes, err := v1.FindByID(ctx, id)
-		if err != nil {
-			discord.SendErrMsg(session, err)
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
-
-		token, err = discord.CodeToToken(code, id)
 		if err != nil {
 			discord.SendErrMsg(session, err)
 			c.JSON(http.StatusUnauthorized, "認証されていません")
@@ -112,16 +113,33 @@ func getServer(c *gin.Context) {
 	)
 
 	bffErr := (func() error {
-		apiRes, err = v1.FindByID(ctx, id)
+		req := &ReqConfig{}
+		if err = c.BindJSON(req); err != nil {
+			return errors.NewError("リクエストをJSONにバインドできません", err)
+		}
+
+		apiReqBlocks := make([]v1.BlockReq, 0)
+
+		for _, rb := range req.Block {
+			apiBlockReq := v1.BlockReq{}
+			apiBlockReq.Keyword = rb.Keyword
+			apiBlockReq.Reply = rb.Reply
+			apiBlockReq.IsAllMatch = rb.IsAllMatch
+			apiBlockReq.IsRandom = rb.IsRandom
+			apiBlockReq.IsEmbed = rb.IsEmbed
+
+			apiReqBlocks = append(apiReqBlocks, apiBlockReq)
+		}
+
+		apiRes, err = v1.UpdateConfig(session, ctx, id, req.AdminRoleID, apiReqBlocks)
 		if err != nil {
-			return errors.NewError("IDでサーバーを取得できません", err)
+			return errors.NewError("設定を更新できません", err)
 		}
 
 		return nil
 	})()
 
 	if bffErr != nil {
-		// ロールバックを実行します
 		txErr := tx.Rollback()
 		if txErr != nil {
 			discord.SendErrMsg(
@@ -158,6 +176,5 @@ func getServer(c *gin.Context) {
 		res.Block = append(res.Block, blockRes)
 	}
 
-	c.Header("token", token)
 	c.JSON(http.StatusOK, res)
 }

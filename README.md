@@ -48,7 +48,7 @@ GET /server
 ### 2. 設定を更新(Adminのみ)
 
 ```
-POST /config
+POST /server/config
 ```
 
 ##### クエリパラメーター
