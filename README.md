@@ -98,3 +98,13 @@ POST /server/config
 - 使用条件
     - Devのみ実行可能
     - `TEST SERVER`でのみ実行可能
+
+### 3. ヘルプ(Adminのみ)
+
+```
+/help
+```
+
+- 使用条件
+    - Adminのみ実行可能
+    - 全てのサーバーで実行可能
