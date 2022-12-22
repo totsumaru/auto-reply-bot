@@ -55,8 +55,6 @@ func CodeToToken(code, serverID string) (string, error) {
 		return "", errors.NewError("レスポンスbodyのデコードに失敗しました", err)
 	}
 
-	fmt.Printf("%#v\n", res)
-
 	token := seeker.Str(res, []string{"access_token"})
 	if token == "" {
 		return "", errors.NewError("codeでtokenを取得できません")
