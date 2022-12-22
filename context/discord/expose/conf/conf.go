@@ -1,4 +1,4 @@
-package discord
+package conf
 
 // 各種IDです
 const (

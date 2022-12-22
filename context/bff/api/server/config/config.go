@@ -1,13 +1,13 @@
 package config
 
 import (
-	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord/convert"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord/message_send"
+	"github.com/techstart35/auto-reply-bot/context/bff/shared"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/check"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/convert"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/initiate"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
-	"github.com/techstart35/auto-reply-bot/context/shared/db"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 	"net/http"
 )
@@ -47,35 +47,19 @@ type ResGetServerBlock struct {
 
 // サーバーの設定を更新します
 func postServerConfig(c *gin.Context) {
-	session, err := discord.CreateSession()
+	session, err := initiate.CreateSession()
 	if err != nil {
 		message_send.SendErrMsg(session, err)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
-	conf, err := db.NewConf()
+	ctx, tx, err := shared.CreateDBTx()
 	if err != nil {
 		message_send.SendErrMsg(session, err)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
-
-	database, err := db.NewDB(conf)
-	if err != nil {
-		message_send.SendErrMsg(session, err)
-		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
-		return
-	}
-
-	tx, err := database.Begin()
-	if err != nil {
-		message_send.SendErrMsg(session, err)
-		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
-		return
-	}
-
-	ctx := context.WithValue(context.Background(), "tx", tx)
 
 	id := c.Query("id")
 	token := c.GetHeader("token")
@@ -96,7 +80,7 @@ func postServerConfig(c *gin.Context) {
 			return
 		}
 
-		ok, err := discord.HasRole(session, id, userID, tmpRes.AdminRoleID)
+		ok, err := check.HasRole(session, id, userID, tmpRes.AdminRoleID)
 		if err != nil {
 			message_send.SendErrMsg(session, err)
 			c.JSON(http.StatusUnauthorized, "認証されていません")

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord/cmd"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord/critical"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord/message_send"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/cmd"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/critical"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )
@@ -35,7 +35,7 @@ var CmdDeleteServer = cmd.CMD{
 			}
 
 			// Devであるかを検証します
-			if m.Member.User.ID != discord.TotsumaruDiscordID {
+			if m.Member.User.ID != conf.TotsumaruDiscordID {
 				if err := message_send.SendEphemeralReply(s, m, "権限がありません"); err != nil {
 					message_send.SendInteractionErrMsg(s, m, err)
 					return

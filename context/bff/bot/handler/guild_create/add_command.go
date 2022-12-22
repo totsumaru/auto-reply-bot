@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/techstart35/auto-reply-bot/context/bff/bot/cmd"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
 	"log"
 	"os"
 )
@@ -17,7 +17,7 @@ func AddCommandHandler(s *discordgo.Session, m *discordgo.GuildCreate) {
 	// TESTサーバーの場合は以下のコマンドを追加します
 	// =========================================
 
-	if m.Guild.ID == discord.TestServerID {
+	if m.Guild.ID == conf.TestServerID {
 		fmt.Println("専用コマンドを追加します id: ", m.Guild.ID)
 		// create-server: サーバーを作成します
 		{

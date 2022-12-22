@@ -1,4 +1,4 @@
-package discord
+package check
 
 import (
 	"github.com/bwmarrin/discordgo"

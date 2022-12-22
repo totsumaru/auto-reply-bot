@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord/cmd"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/cmd"
 )
 
 // 設定に関する情報を取得します
