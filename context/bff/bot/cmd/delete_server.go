@@ -5,12 +5,15 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord/cmd"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord/critical"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord/message_send"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )
 
 // サーバーを削除するコマンドです
-var CmdDeleteServer = CMD{
+var CmdDeleteServer = cmd.CMD{
 	Name:        CMDNameDeleteServer,
 	Description: "登録を削除 & サーバーからbotを削除します",
 	Options: []*discordgo.ApplicationCommandOption{
@@ -33,8 +36,8 @@ var CmdDeleteServer = CMD{
 
 			// Devであるかを検証します
 			if m.Member.User.ID != discord.TotsumaruDiscordID {
-				if err := discord.SendEphemeralReply(s, m, "権限がありません"); err != nil {
-					discord.SendInteractionErrMsg(s, m, err)
+				if err := message_send.SendEphemeralReply(s, m, "権限がありません"); err != nil {
+					message_send.SendInteractionErrMsg(s, m, err)
 					return
 				}
 				return
@@ -43,7 +46,7 @@ var CmdDeleteServer = CMD{
 
 		ctx, tx, err := shared.CreateDBTx()
 		if err != nil {
-			discord.SendInteractionErrMsg(s, m, err)
+			message_send.SendInteractionErrMsg(s, m, err)
 			return
 		}
 
@@ -61,7 +64,7 @@ var CmdDeleteServer = CMD{
 			}
 
 			// サーバーからbotを削除します
-			if err := discord.LeaveFromServer(s, id); err != nil {
+			if err := critical.LeaveFromServer(s, id); err != nil {
 				return errors.NewError("サーバーからbotを削除できません", err)
 			}
 
@@ -73,28 +76,28 @@ var CmdDeleteServer = CMD{
 			txErr := tx.Rollback()
 			if txErr != nil {
 				msg := errors.NewError("ロールバックに失敗しました。データに不整合が発生している可能性があります。")
-				discord.SendInteractionErrMsg(s, m, msg)
+				message_send.SendInteractionErrMsg(s, m, msg)
 				return
 			}
 
-			discord.SendInteractionErrMsg(s, m, err)
+			message_send.SendInteractionErrMsg(s, m, err)
 			return
 		}
 
 		if txErr := tx.Commit(); txErr != nil {
-			discord.SendInteractionErrMsg(s, m, err)
+			message_send.SendInteractionErrMsg(s, m, err)
 			return
 		}
 
 		gl, err := s.Guild(id)
 		if err != nil {
-			discord.SendInteractionErrMsg(s, m, err)
+			message_send.SendInteractionErrMsg(s, m, err)
 			return
 		}
 
 		msg := fmt.Sprintf("ID: %s, Name: %s を削除しました", gl.ID, gl.Name)
-		if err := discord.SendReplyInteraction(s, m, msg); err != nil {
-			discord.SendInteractionErrMsg(s, m, err)
+		if err := message_send.SendReplyInteraction(s, m, msg); err != nil {
+			message_send.SendInteractionErrMsg(s, m, err)
 			return
 		}
 	},

@@ -1,7 +1,8 @@
-package discord
+package message_send
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord"
 	"github.com/techstart35/auto-reply-bot/context/shared/now"
 	"log"
 )
@@ -12,11 +13,11 @@ func SendErrMsg(s *discordgo.Session, e error) {
 	embedInfo := &discordgo.MessageEmbed{
 		Title:       "エラーが発生しました",
 		Description: e.Error(),
-		Color:       ColorRed,
+		Color:       discord.ColorRed,
 		Timestamp:   now.GetNowTimeStamp(),
 	}
 
-	_, err := s.ChannelMessageSendEmbed(ErrMsgChannelID, embedInfo)
+	_, err := s.ChannelMessageSendEmbed(discord.ErrMsgChannelID, embedInfo)
 	if err != nil {
 		log.Println(err)
 	}
@@ -27,7 +28,7 @@ func SendInteractionErrMsg(s *discordgo.Session, i *discordgo.InteractionCreate,
 	embed := &discordgo.MessageEmbed{
 		Title:       "エラーが発生しました",
 		Description: e.Error(),
-		Color:       ColorRed,
+		Color:       discord.ColorRed,
 		Timestamp:   now.GetNowTimeStamp(),
 	}
 

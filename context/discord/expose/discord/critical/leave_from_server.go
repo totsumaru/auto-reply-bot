@@ -1,4 +1,4 @@
-package discord
+package critical
 
 import (
 	"github.com/bwmarrin/discordgo"

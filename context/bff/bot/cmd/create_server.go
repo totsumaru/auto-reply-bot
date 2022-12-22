@@ -5,12 +5,14 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord/cmd"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord/message_send"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )
 
 // サーバーを作成するコマンドです
-var CmdCreateServer = CMD{
+var CmdCreateServer = cmd.CMD{
 	Name:        CMDNameCreateServer,
 	Description: "サーバーを作成します",
 	Options: []*discordgo.ApplicationCommandOption{
@@ -34,8 +36,8 @@ var CmdCreateServer = CMD{
 
 			// Devであるかを検証します
 			if m.Member.User.ID != discord.TotsumaruDiscordID {
-				if err := discord.SendEphemeralReply(s, m, "権限がありません"); err != nil {
-					discord.SendInteractionErrMsg(s, m, err)
+				if err := message_send.SendEphemeralReply(s, m, "権限がありません"); err != nil {
+					message_send.SendInteractionErrMsg(s, m, err)
 					return
 				}
 				return
@@ -44,7 +46,7 @@ var CmdCreateServer = CMD{
 
 		ctx, tx, err := shared.CreateDBTx()
 		if err != nil {
-			discord.SendInteractionErrMsg(s, m, err)
+			message_send.SendInteractionErrMsg(s, m, err)
 			return
 		}
 
@@ -73,28 +75,28 @@ var CmdCreateServer = CMD{
 			txErr := tx.Rollback()
 			if txErr != nil {
 				msg := errors.NewError("ロールバックに失敗しました。データに不整合が発生している可能性があります。")
-				discord.SendInteractionErrMsg(s, m, msg)
+				message_send.SendInteractionErrMsg(s, m, msg)
 				return
 			}
 
-			discord.SendInteractionErrMsg(s, m, err)
+			message_send.SendInteractionErrMsg(s, m, err)
 			return
 		}
 
 		if txErr := tx.Commit(); txErr != nil {
-			discord.SendInteractionErrMsg(s, m, err)
+			message_send.SendInteractionErrMsg(s, m, err)
 			return
 		}
 
 		gl, err := s.Guild(apiRes.ID)
 		if err != nil {
-			discord.SendInteractionErrMsg(s, m, err)
+			message_send.SendInteractionErrMsg(s, m, err)
 			return
 		}
 
 		msg := fmt.Sprintf("ID: %s, Name: %s を追加しました", gl.ID, gl.Name)
-		if err := discord.SendReplyInteraction(s, m, msg); err != nil {
-			discord.SendInteractionErrMsg(s, m, err)
+		if err := message_send.SendReplyInteraction(s, m, msg); err != nil {
+			message_send.SendInteractionErrMsg(s, m, err)
 			return
 		}
 	},

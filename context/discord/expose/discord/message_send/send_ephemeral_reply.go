@@ -1,4 +1,4 @@
-package discord
+package message_send
 
 import (
 	"github.com/bwmarrin/discordgo"

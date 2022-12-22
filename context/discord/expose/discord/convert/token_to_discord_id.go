@@ -1,4 +1,4 @@
-package discord
+package convert
 
 import (
 	"encoding/json"

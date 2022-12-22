@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord/convert"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord/message_send"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/db"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
@@ -47,28 +49,28 @@ type ResGetServerBlock struct {
 func postServerConfig(c *gin.Context) {
 	session, err := discord.CreateSession()
 	if err != nil {
-		discord.SendErrMsg(session, err)
+		message_send.SendErrMsg(session, err)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	conf, err := db.NewConf()
 	if err != nil {
-		discord.SendErrMsg(session, err)
+		message_send.SendErrMsg(session, err)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	database, err := db.NewDB(conf)
 	if err != nil {
-		discord.SendErrMsg(session, err)
+		message_send.SendErrMsg(session, err)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	tx, err := database.Begin()
 	if err != nil {
-		discord.SendErrMsg(session, err)
+		message_send.SendErrMsg(session, err)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
@@ -82,27 +84,27 @@ func postServerConfig(c *gin.Context) {
 	{
 		tmpRes, err := v1.FindByID(ctx, id)
 		if err != nil {
-			discord.SendErrMsg(session, err)
+			message_send.SendErrMsg(session, err)
 			c.JSON(http.StatusUnauthorized, "認証されていません")
 			return
 		}
 
-		userID, err := discord.TokenToDiscordID(token)
+		userID, err := convert.TokenToDiscordID(token)
 		if err != nil {
-			discord.SendErrMsg(session, err)
+			message_send.SendErrMsg(session, err)
 			c.JSON(http.StatusUnauthorized, "認証されていません")
 			return
 		}
 
 		ok, err := discord.HasRole(session, id, userID, tmpRes.AdminRoleID)
 		if err != nil {
-			discord.SendErrMsg(session, err)
+			message_send.SendErrMsg(session, err)
 			c.JSON(http.StatusUnauthorized, "認証されていません")
 			return
 		}
 
 		if !ok {
-			discord.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"))
+			message_send.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"))
 			c.JSON(http.StatusUnauthorized, "認証されていません")
 			return
 		}
@@ -142,20 +144,20 @@ func postServerConfig(c *gin.Context) {
 	if bffErr != nil {
 		txErr := tx.Rollback()
 		if txErr != nil {
-			discord.SendErrMsg(
+			message_send.SendErrMsg(
 				session,
 				errors.NewError("ロールバックに失敗しました。データに不整合が発生している可能性があります。"),
 			)
 			return
 		}
 
-		discord.SendErrMsg(session, bffErr)
+		message_send.SendErrMsg(session, bffErr)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	if txErr := tx.Commit(); txErr != nil {
-		discord.SendErrMsg(session, err)
+		message_send.SendErrMsg(session, err)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
