@@ -1,12 +1,8 @@
 package server
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/check"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/convert"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/initiate"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
@@ -52,57 +48,59 @@ func getServer(c *gin.Context) {
 	}
 
 	id := c.Query("id")
-	code := c.Query("code")
+	// TODO: コメントアウト解除（FEの実装のため一時的にコメントアウト）
+	//code := c.Query("code")
 
 	var (
 		token string
 	)
 
+	// TODO: コメントアウト解除（FEの実装のため一時的にコメントアウト）
 	// 認証されているユーザーかを検証します
-	{
-		tmpRes, err := v1.FindByID(ctx, id)
-		if err != nil {
-			message_send.SendErrMsg(session, err)
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
-
-		token, err = convert.CodeToToken(code, id)
-		if err != nil {
-			// codeの不正に関してはエラー通知しません
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
-
-		fmt.Println("token: ", token)
-
-		userID, err := convert.TokenToDiscordID(token)
-		if err != nil {
-			message_send.SendErrMsg(session, err)
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
-
-		ok, err := check.HasRole(session, id, userID, tmpRes.AdminRoleID)
-		if err != nil {
-			message_send.SendErrMsg(session, err)
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
-
-		guild, err := session.Guild(id)
-		if err != nil {
-			message_send.SendErrMsg(session, err)
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
-
-		if !(ok || userID == guild.OwnerID || userID == conf.TotsumaruDiscordID) {
-			message_send.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"))
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
-	}
+	//{
+	//	tmpRes, err := v1.FindByID(ctx, id)
+	//	if err != nil {
+	//		message_send.SendErrMsg(session, err)
+	//		c.JSON(http.StatusUnauthorized, "認証されていません")
+	//		return
+	//	}
+	//
+	//	token, err = convert.CodeToToken(code, id)
+	//	if err != nil {
+	//		// codeの不正に関してはエラー通知しません
+	//		c.JSON(http.StatusUnauthorized, "認証されていません")
+	//		return
+	//	}
+	//
+	//	fmt.Println("token: ", token)
+	//
+	//	userID, err := convert.TokenToDiscordID(token)
+	//	if err != nil {
+	//		message_send.SendErrMsg(session, err)
+	//		c.JSON(http.StatusUnauthorized, "認証されていません")
+	//		return
+	//	}
+	//
+	//	ok, err := check.HasRole(session, id, userID, tmpRes.AdminRoleID)
+	//	if err != nil {
+	//		message_send.SendErrMsg(session, err)
+	//		c.JSON(http.StatusUnauthorized, "認証されていません")
+	//		return
+	//	}
+	//
+	//	guild, err := session.Guild(id)
+	//	if err != nil {
+	//		message_send.SendErrMsg(session, err)
+	//		c.JSON(http.StatusUnauthorized, "認証されていません")
+	//		return
+	//	}
+	//
+	//	if !(ok || userID == guild.OwnerID || userID == conf.TotsumaruDiscordID) {
+	//		message_send.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"))
+	//		c.JSON(http.StatusUnauthorized, "認証されていません")
+	//		return
+	//	}
+	//}
 
 	var (
 		apiRes = v1.Res{}
