@@ -35,9 +35,9 @@ func AddCommandHandler(s *discordgo.Session, m *discordgo.GuildCreate) {
 	// =========================================
 
 	// help: 設定に関する情報を返します
-	_, err := discordCmd.AddCommand(s, m.Guild.ID, cmd.CmdDeleteServer)
+	_, err := discordCmd.AddCommand(s, m.Guild.ID, cmd.CmdHelp)
 	if err != nil {
-		message_send.SendErrMsg(s, errors.NewError("delete-serverコマンドを追加できません", err))
+		message_send.SendErrMsg(s, errors.NewError("helpコマンドを追加できません", err))
 		return
 	}
 }

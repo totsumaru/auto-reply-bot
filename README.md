@@ -11,7 +11,7 @@
 
 ## botの導入URL
 
-[botの導入はこちら](https://discord.com/api/oauth2/authorize?client_id=1054635548142223400&permissions=412317207552&scope=bot)
+[botの導入はこちら](https://discord.com/api/oauth2/authorize?client_id=1055348253614419989&permissions=412317207552&scope=bot)
 
 #### 権限
 
