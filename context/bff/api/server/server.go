@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
@@ -82,7 +81,7 @@ func getServer(c *gin.Context) {
 
 		token, err = discord.CodeToToken(code, id)
 		if err != nil {
-			discord.SendErrMsg(session, err)
+			// codeの不正に関してはエラー通知しません
 			c.JSON(http.StatusUnauthorized, "認証されていません")
 			return
 		}
@@ -101,12 +100,18 @@ func getServer(c *gin.Context) {
 			return
 		}
 
-		fmt.Println(ok)
-		//if !ok {
-		//	discord.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"))
-		//	c.JSON(http.StatusUnauthorized, "認証されていません")
-		//	return
-		//}
+		guild, err := session.Guild(id)
+		if err != nil {
+			discord.SendErrMsg(session, err)
+			c.JSON(http.StatusUnauthorized, "認証されていません")
+			return
+		}
+
+		if !(ok || userID == guild.OwnerID || userID == discord.TotsumaruDiscordID) {
+			discord.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"))
+			c.JSON(http.StatusUnauthorized, "認証されていません")
+			return
+		}
 	}
 
 	var (

@@ -1,14 +1,12 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/discord"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
-	"github.com/techstart35/auto-reply-bot/context/shared/db"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
-	"log"
 )
 
 // サーバーを作成するコマンドです
@@ -27,34 +25,28 @@ var CmdCreateServer = CMD{
 	},
 	// コマンドが実行された時の処理です
 	Handler: func(s *discordgo.Session, m *discordgo.InteractionCreate) {
-		// Devであるかを検証します
+		// 検証します
 		{
+			// コマンドが正しいかを検証します
+			if m.Interaction.ApplicationCommandData().Name != CMDNameCreateServer {
+				return
+			}
+
+			// Devであるかを検証します
 			if m.Member.User.ID != discord.TotsumaruDiscordID {
 				if err := discord.SendEphemeralReply(s, m, "権限がありません"); err != nil {
-					log.Fatalln(err)
+					discord.SendInteractionErrMsg(s, m, err)
+					return
 				}
+				return
 			}
 		}
 
-		conf, err := db.NewConf()
+		ctx, tx, err := shared.CreateDBTx()
 		if err != nil {
 			discord.SendInteractionErrMsg(s, m, err)
 			return
 		}
-
-		database, err := db.NewDB(conf)
-		if err != nil {
-			discord.SendInteractionErrMsg(s, m, err)
-			return
-		}
-
-		tx, err := database.Begin()
-		if err != nil {
-			discord.SendInteractionErrMsg(s, m, err)
-			return
-		}
-
-		ctx := context.WithValue(context.Background(), "tx", tx)
 
 		var (
 			apiRes = v1.Res{}
