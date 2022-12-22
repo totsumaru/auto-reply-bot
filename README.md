@@ -13,6 +13,9 @@
 
 [botの導入はこちら](https://discord.com/api/oauth2/authorize?client_id=1055348253614419989&permissions=412317207552&scope=bot)
 
+TODO: 一時的なURLのため削除  
+[管理者のログインはこちら](https://discord.com/api/oauth2/authorize?client_id=1055348253614419989&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fserver%3Fid%3D1055315616002740294&response_type=code&scope=identify)
+
 #### 権限
 
 - Read Messages/View Channels
