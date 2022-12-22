@@ -33,15 +33,32 @@ GET /server
 
 ##### クエリパラメーター
 
-| パラメーター | 内容                | 必須   | 例                  |
-|--------|-------------------|------|--------------------|
-| id     | DiscordのサーバーID    | true | 984614055681613864 |
-| code   | Discordログイン後のcode | true | 123                |
+| パラメーター | 内容                | 必須   | 例                              |
+|--------|-------------------|------|--------------------------------|
+| id     | DiscordのサーバーID    | true | 984614055681613864             |
+| code   | Discordログイン後のcode | true | N5GeO3MTBvAyIPMvhjUNItkqrLg2aA |
 
 ##### レスポンス
 
 ```json
 {
+  "id": "1055315616002740294",
+  "admin_role_id": "1055362036495826964",
+  "block": [
+    {
+      "keyword": [
+        "hello",
+        "world"
+      ],
+      "reply": [
+        "good",
+        "very good"
+      ],
+      "is_all_match": true,
+      "is_random": true,
+      "is_embed": false
+    }
+  ]
 }
 ```
 
@@ -59,14 +76,30 @@ POST /server/config
 
 ##### ヘッダー
 
-| key   | value             | 必須   | 例          |
-|-------|-------------------|------|------------|
-| token | トークン              | true | abcdxyz... |
+| key   | value | 必須   | 例                              |
+|-------|-------|------|--------------------------------|
+| token | トークン  | true | HVBJiJU3JtJxAeXg0mTOavM5R0lty3 |
 
 ##### Body
 
 ```json
 {
+  "admin_role_id": "1055362036495826964",
+  "block": [
+    {
+      "keyword": [
+        "hello",
+        "world"
+      ],
+      "reply": [
+        "good",
+        "very good"
+      ],
+      "is_all_match": true,
+      "is_random": true,
+      "is_embed": false
+    }
+  ]
 }
 ```
 
@@ -74,6 +107,23 @@ POST /server/config
 
 ```json
 {
+  "id": "1055315616002740294",
+  "admin_role_id": "1055362036495826964",
+  "block": [
+    {
+      "keyword": [
+        "hello",
+        "world"
+      ],
+      "reply": [
+        "good",
+        "very good"
+      ],
+      "is_all_match": true,
+      "is_random": true,
+      "is_embed": false
+    }
+  ]
 }
 ```
 

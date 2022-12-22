@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/check"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/convert"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/initiate"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
@@ -87,7 +88,14 @@ func postServerConfig(c *gin.Context) {
 			return
 		}
 
-		if !ok {
+		guild, err := session.Guild(id)
+		if err != nil {
+			message_send.SendErrMsg(session, err)
+			c.JSON(http.StatusUnauthorized, "認証されていません")
+			return
+		}
+
+		if !(ok || userID == guild.OwnerID || userID == conf.TotsumaruDiscordID) {
 			message_send.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"))
 			c.JSON(http.StatusUnauthorized, "認証されていません")
 			return

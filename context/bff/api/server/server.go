@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/check"
@@ -72,6 +73,8 @@ func getServer(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, "認証されていません")
 			return
 		}
+
+		fmt.Println("token: ", token)
 
 		userID, err := convert.TokenToDiscordID(token)
 		if err != nil {
