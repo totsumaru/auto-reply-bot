@@ -19,6 +19,11 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	// Botユーザーはカウントしません
+	if m.Author.Bot {
+		return
+	}
+
 	content := m.Content
 
 	ctx, _, err := shared.CreateDBTx()
@@ -34,18 +39,26 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	for _, block := range apiRes.Block {
-		if block.IsAllMatch {
-			// --------------------------
-			// 全てのキーワードを含む場合
-			// --------------------------
+		mustReply := true
 
-			// 1つでも含んでいないキーワードがあれば終了
+		if block.IsAllMatch {
+			// [全て含む場合]1つでも含んでいないキーワードがあれば終了
 			for _, keyword := range block.Keyword {
 				if !strings.Contains(content, keyword) {
-					return
+					mustReply = false
+					break
 				}
 			}
+		} else {
+			// [1つでも含む場合]1つでも含んでいるキーワードがあれば終了
+			for _, keyword := range block.Keyword {
+				if strings.Contains(content, keyword) {
+					break
+				}
+			}
+		}
 
+		if mustReply {
 			// 返信を送信します。
 			//
 			// ランダムに返信を返すかを確認します。
@@ -54,34 +67,21 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 				msg = getRandomMessage(block.Reply)
 			}
 
-			if err := message_send.SendReply(s, m.GuildID, m.ChannelID, m.ID, msg); err != nil {
-				message_send.SendErrMsg(s, errors.NewError("返信を送信できません", err))
-				return
-			}
-		} else {
-			// --------------------------
-			// 1つでもキーワードを含む場合
-			// --------------------------
-
-			isContained := false
-
-			for _, keyword := range block.Keyword {
-				if strings.Contains(content, keyword) {
-					isContained = true
-					break
+			if block.IsEmbed {
+				// 埋め込みメッセージを送信します
+				req := message_send.SendReplyEmbedReq{
+					ChannelID: m.ChannelID,
+					Content:   msg,
+					Color:     conf.ColorCyan,
+					Reference: m.Reference(),
 				}
-			}
-
-			if isContained {
-				// 返信を送信します。
-				//
-				// ランダムに返信を返すかを確認します。
-				msg := block.Reply[0]
-				if block.IsRandom {
-					msg = getRandomMessage(block.Reply)
+				if err = message_send.SendReplyEmbed(s, req); err != nil {
+					message_send.SendErrMsg(s, errors.NewError("埋め込みの返信を送信できません", err))
+					return
 				}
-
-				if err := message_send.SendReply(s, m.GuildID, m.ChannelID, m.ID, msg); err != nil {
+			} else {
+				// 通常のテキストメッセージを送信します
+				if err = message_send.SendReply(s, m.GuildID, m.ChannelID, m.ID, msg); err != nil {
 					message_send.SendErrMsg(s, errors.NewError("返信を送信できません", err))
 					return
 				}
@@ -90,6 +90,7 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+// メッセージのスライスからランダムに1つ取得します
 func getRandomMessage(messages []string) string {
 	rand.Seed(time.Now().UnixNano())
 	index := rand.Intn(len(messages))
