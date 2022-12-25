@@ -63,7 +63,7 @@ var CmdDeleteServer = cmd.CMD{
 				return errors.NewError("サーバーを作成できません", err)
 			}
 
-			// TODO: issue#10 削除時に退出させるか検討(pending)
+			// TODO: issue#10(pending) 削除時に退出させるか検討
 			// サーバーからbotを削除します
 			//if err := critical.LeaveFromServer(s, id); err != nil {
 			//	return errors.NewError("サーバーからbotを削除できません", err)

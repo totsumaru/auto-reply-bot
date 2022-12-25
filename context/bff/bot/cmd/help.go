@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/check"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/cmd"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
+	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 	"net/url"
 )
@@ -33,11 +36,49 @@ var CmdHelp = cmd.CMD{
 	Name:        CMDNameHelp,
 	Description: "設定に関する情報を表示します",
 	Handler: func(s *discordgo.Session, m *discordgo.InteractionCreate) {
+		ctx, _, err := shared.CreateDBTx()
+		if err != nil {
+			message_send.SendEphemeralInteractionErrMsg(s, m, fmt.Errorf("エラーが発生しました"))
+			message_send.SendErrMsg(s, errors.NewError("DBトランザクションを作成できません", err))
+			return
+		}
+
 		// 検証します
 		{
 			// コマンドが正しいかを検証します
 			if m.Interaction.ApplicationCommandData().Name != CMDNameHelp {
 				return
+			}
+
+			// Dev,Owner,Adminのどれかであることを確認します
+			{
+				tmpRes, err := v1.FindByID(ctx, m.GuildID)
+				if err != nil {
+					message_send.SendEphemeralInteractionErrMsg(s, m, fmt.Errorf("エラーが発生しました"))
+					message_send.SendErrMsg(s, errors.NewError("IDでサーバーを取得できません", err))
+					return
+				}
+
+				ok, err := check.HasRole(s, m.GuildID, m.Member.User.ID, tmpRes.AdminRoleID)
+				if err != nil {
+					message_send.SendEphemeralInteractionErrMsg(s, m, fmt.Errorf("エラーが発生しました"))
+					message_send.SendErrMsg(s, errors.NewError("ロールの所有を確認できません", err))
+					return
+				}
+
+				guildOwnerID, err := guild.GetGuildOwnerID(s, m.GuildID)
+				if err != nil {
+					message_send.SendEphemeralInteractionErrMsg(s, m, fmt.Errorf("エラーが発生しました"))
+					message_send.SendErrMsg(s, errors.NewError("ギルドのオーナーIDを取得できません", err))
+					return
+				}
+
+				userID := m.Member.User.ID
+				if !(ok || userID == guildOwnerID || userID == conf.TotsumaruDiscordID) {
+					message_send.SendEphemeralInteractionErrMsg(s, m, fmt.Errorf("権限がありません"))
+					// Devにエラーメッセージは送信しません
+					return
+				}
 			}
 		}
 
