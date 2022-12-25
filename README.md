@@ -49,6 +49,7 @@ GET /server
   "admin_role_id": "1055362036495826964",
   "block": [
     {
+      "name": "あいさつ",
       "keyword": [
         "hello",
         "world"
@@ -60,6 +61,26 @@ GET /server
       "is_all_match": true,
       "is_random": true,
       "is_embed": false
+    }
+  ],
+  "server_name": "TEST 2",
+  "avatar_url": "https://cdn.discordapp.com/icons/1055315616002740294/c17fe110e848098db614687645f17586.png",
+  "role": [
+    {
+      "id": "1055315616002740294",
+      "name": "@everyone"
+    },
+    {
+      "id": "1055350145975328863",
+      "name": "[test]自動返信bot"
+    },
+    {
+      "id": "1055362036495826964",
+      "name": "自動返信botの管理者"
+    },
+    {
+      "id": "1056464506554957824",
+      "name": "テストロールです"
     }
   ]
 }
@@ -90,6 +111,7 @@ POST /server/config
   "admin_role_id": "1055362036495826964",
   "block": [
     {
+      "name": "あいさつ",
       "keyword": [
         "hello",
         "world"
@@ -114,6 +136,7 @@ POST /server/config
   "admin_role_id": "1055362036495826964",
   "block": [
     {
+      "name": "あいさつ",
       "keyword": [
         "hello",
         "world"
@@ -125,6 +148,26 @@ POST /server/config
       "is_all_match": true,
       "is_random": true,
       "is_embed": false
+    }
+  ],
+  "server_name": "TEST 2",
+  "avatar_url": "https://cdn.discordapp.com/icons/1055315616002740294/c17fe110e848098db614687645f17586.png",
+  "role": [
+    {
+      "id": "1055315616002740294",
+      "name": "@everyone"
+    },
+    {
+      "id": "1055350145975328863",
+      "name": "[test]自動返信bot"
+    },
+    {
+      "id": "1055362036495826964",
+      "name": "自動返信botの管理者"
+    },
+    {
+      "id": "1056464506554957824",
+      "name": "テストロールです"
     }
   ]
 }
