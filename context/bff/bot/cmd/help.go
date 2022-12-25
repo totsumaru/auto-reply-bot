@@ -11,16 +11,16 @@ import (
 )
 
 const msg = `
-あらかじめ決められた条件に一致するコメントが送信された場合、
+決められた条件に一致するコメントが送信された場合、
 自動で返信をするbotです。
 
 ■ 各種URL
-・[設定はこちら](%s)
 ・[管理者に問い合わせ(Twitter)](https://twitter.com/totsumaru_dot)
-・[botの導入はこちらから](https://localhost:8080)
-`
 
-// TODO: 返信はEphemeralの埋め込みにしたい
+■ お知らせ
+・設定画面は以下のボタンからアクセスしてください
+・導入のご依頼はTwitterのDMからお願いします
+`
 
 // 設定に関する情報を取得します
 var CmdHelp = cmd.CMD{
@@ -35,14 +35,15 @@ var CmdHelp = cmd.CMD{
 			}
 		}
 
-		req := message_send.SendMessageEmbedReq{
-			ChannelID: m.ChannelID,
-			Title:     "botについて",
-			Content:   fmt.Sprintf(msg, os.Getenv("FE_ROOT_URL")),
-			Color:     conf.ColorYellow,
-		}
+		url := fmt.Sprintf(
+			"%s?id=%s",
+			os.Getenv("FE_ROOT_URL"),
+			m.GuildID,
+		)
 
-		if err := message_send.SendMessageEmbed(s, req); err != nil {
+		if err := message_send.SendEmbedEphemeralReplyWithURLBtn(
+			s, m, "botについて", msg, url, conf.ColorYellow,
+		); err != nil {
 			message_send.SendErrMsg(s, errors.NewError("helpコマンドに対する返信を遅れません", err))
 			return
 		}
