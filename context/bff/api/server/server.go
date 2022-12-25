@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/check"
@@ -26,6 +25,7 @@ type Res struct {
 	AdminRoleID string     `json:"admin_role_id"`
 	Block       []resBlock `json:"block"`
 	// 以下はComputedです
+	Token      string    `json:"token"`
 	ServerName string    `json:"server_name"`
 	AvatarURL  string    `json:"avatar_url"`
 	Role       []resRole `json:"role"`
@@ -69,8 +69,6 @@ func getServer(c *gin.Context) {
 	var (
 		token string
 	)
-
-	fmt.Println("ID: ", id)
 
 	// 認証されているユーザーかを検証します
 	{
@@ -176,6 +174,7 @@ func getServer(c *gin.Context) {
 	res.ID = apiRes.ID
 	res.AdminRoleID = apiRes.AdminRoleID
 	res.Block = []resBlock{}
+	res.Token = token
 	res.ServerName = guildName
 	res.AvatarURL = avatarURL
 	res.Role = []resRole{}
@@ -203,6 +202,5 @@ func getServer(c *gin.Context) {
 		res.Role = append(res.Role, tmpRole)
 	}
 
-	c.Header("token", token)
 	c.JSON(http.StatusOK, res)
 }

@@ -48,8 +48,6 @@ var CmdHelp = cmd.CMD{
 			url.QueryEscape(redirectURL),
 		)
 
-		fmt.Println("URL: ", discordLoginURL)
-
 		if err := message_send.SendEmbedEphemeralReplyWithURLBtn(
 			s, m, "botについて", msg, discordLoginURL, conf.ColorYellow,
 		); err != nil {

@@ -11,6 +11,10 @@ import (
 
 // tokenからDiscordIDに変換します
 func TokenToDiscordID(token string) (string, error) {
+	if token == "" {
+		return "", errors.NewError("トークンが空です")
+	}
+
 	req, _ := http.NewRequest(
 		http.MethodGet,
 		"https://discordapp.com/api/users/@me",
@@ -35,6 +39,9 @@ func TokenToDiscordID(token string) (string, error) {
 	}
 
 	discordID := seeker.Str(res, []string{"id"})
+	if discordID == "" {
+		return "", errors.NewError("トークンからDiscordIDに変換できません")
+	}
 
 	return discordID, nil
 }
