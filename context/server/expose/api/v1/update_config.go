@@ -11,6 +11,7 @@ import (
 
 // ブロックのリクエストです
 type BlockReq struct {
+	Name       string
 	Keyword    []string
 	Reply      []string
 	IsAllMatch bool
@@ -47,6 +48,7 @@ func UpdateConfig(
 	appBlockReq := make([]app.BlockReq, 0)
 	for _, v := range blockReq {
 		bl := app.BlockReq{
+			Name:       v.Name,
 			Keyword:    v.Keyword,
 			Reply:      v.Reply,
 			IsAllMatch: v.IsAllMatch,

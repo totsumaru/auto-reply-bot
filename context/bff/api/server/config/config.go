@@ -19,6 +19,7 @@ func ServerConfig(e *gin.Engine) {
 type ReqConfig struct {
 	AdminRoleID string `json:"admin_role_id"`
 	Block       []struct {
+		Name       string   `json:"name"`
 		Keyword    []string `json:"keyword"`
 		Reply      []string `json:"reply"`
 		IsAllMatch bool     `json:"is_all_match"`
@@ -36,6 +37,7 @@ type ResGetServer struct {
 
 // ブロックのレスポンスです
 type ResGetServerBlock struct {
+	Name       string   `json:"name"`
 	Keyword    []string `json:"keyword"`
 	Reply      []string `json:"reply"`
 	IsAllMatch bool     `json:"is_all_match"`
@@ -115,6 +117,7 @@ func postServerConfig(c *gin.Context) {
 
 		for _, rb := range req.Block {
 			apiBlockReq := v1.BlockReq{}
+			apiBlockReq.Name = rb.Name
 			apiBlockReq.Keyword = rb.Keyword
 			apiBlockReq.Reply = rb.Reply
 			apiBlockReq.IsAllMatch = rb.IsAllMatch
@@ -160,6 +163,7 @@ func postServerConfig(c *gin.Context) {
 
 	for _, v := range apiRes.Block {
 		blockRes := ResGetServerBlock{}
+		blockRes.Name = v.Name
 		blockRes.Keyword = v.Keyword
 		blockRes.Reply = v.Reply
 		blockRes.IsAllMatch = v.IsAllMatch

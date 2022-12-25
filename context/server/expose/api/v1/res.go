@@ -13,6 +13,7 @@ type Res struct {
 
 // ブロックのレスポンスです
 type BlockRes struct {
+	Name       string
 	Keyword    []string
 	Reply      []string
 	IsAllMatch bool
@@ -36,6 +37,7 @@ func CreateRes(m map[string]interface{}) (Res, error) {
 		}
 
 		b := BlockRes{}
+		b.Name = seeker.Str(bl, []string{"name", "value"})
 		b.Keyword = kw
 		b.Reply = rep
 		b.IsAllMatch = seeker.Bool(bl, []string{"is_all_match"})

@@ -24,6 +24,7 @@ type ResGetServer struct {
 
 // ブロックのレスポンスです
 type ResGetServerBlock struct {
+	Name       string   `json:"name"`
 	Keyword    []string `json:"keyword"`
 	Reply      []string `json:"reply"`
 	IsAllMatch bool     `json:"is_all_match"`
@@ -144,6 +145,7 @@ func getServer(c *gin.Context) {
 
 	for _, v := range apiRes.Block {
 		blockRes := ResGetServerBlock{}
+		blockRes.Name = v.Name
 		blockRes.Keyword = v.Keyword
 		blockRes.Reply = v.Reply
 		blockRes.IsAllMatch = v.IsAllMatch

@@ -1,7 +1,6 @@
 package module_test
 
 import (
-	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"reflect"
@@ -26,6 +25,7 @@ func TestUpdateConfig(t *testing.T) {
 
 		// テスト対象のAPIをコールします
 		blockReq1 := v1.BlockReq{
+			Name:       "foo",
 			Keyword:    []string{"k1", "k2"},
 			Reply:      []string{"r1", "r2"},
 			IsAllMatch: true,
@@ -53,6 +53,7 @@ func TestUpdateConfig(t *testing.T) {
 		}
 
 		expectBlockRes := v1.BlockRes{
+			Name:       "foo",
 			Keyword:    []string{"k1", "k2"},
 			Reply:      []string{"r1", "r2"},
 			IsAllMatch: true,
@@ -61,8 +62,6 @@ func TestUpdateConfig(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(res.Block, []v1.BlockRes{expectBlockRes}) {
-			fmt.Println(res.Block)
-			fmt.Println([]v1.BlockRes{expectBlockRes})
 			t.Fatal("期待した値と一致しません")
 		}
 	})

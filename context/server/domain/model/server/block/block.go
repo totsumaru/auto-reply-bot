@@ -15,6 +15,7 @@ const (
 
 // ブロックです
 type Block struct {
+	name       Name
 	keyword    []Keyword
 	reply      []Reply
 	isAllMatch bool // キーワードの完全一致フラグ(true=and, false=or)
@@ -24,6 +25,7 @@ type Block struct {
 
 // ブロックを作成します
 func NewBlock(
+	n Name,
 	kw []Keyword,
 	r []Reply,
 	isAllMention bool,
@@ -31,6 +33,7 @@ func NewBlock(
 	isEmbed bool,
 ) (Block, error) {
 	b := Block{}
+	b.name = n
 	b.keyword = kw
 	b.reply = r
 	b.isAllMatch = isAllMention
@@ -42,6 +45,11 @@ func NewBlock(
 	}
 
 	return b, nil
+}
+
+// 名前を取得します
+func (b Block) Name() Name {
+	return b.name
 }
 
 // キーワードを取得します
@@ -104,12 +112,14 @@ func (b Block) validate() error {
 // 構造体をJSONに変換します
 func (b Block) MarshalJSON() ([]byte, error) {
 	j := struct {
+		Name       Name      `json:"name"`
 		Keyword    []Keyword `json:"keyword"`
 		Reply      []Reply   `json:"reply"`
 		IsAllMatch bool      `json:"is_all_match"`
 		IsRandom   bool      `json:"is_random"`
 		IsEmbed    bool      `json:"is_embed"`
 	}{
+		Name:       b.name,
 		Keyword:    b.keyword,
 		Reply:      b.reply,
 		IsAllMatch: b.isAllMatch,
@@ -128,6 +138,7 @@ func (b Block) MarshalJSON() ([]byte, error) {
 // JSONを構造体に変換します
 func (b *Block) UnmarshalJSON(bb []byte) error {
 	j := &struct {
+		Name       Name      `json:"name"`
 		Keyword    []Keyword `json:"keyword"`
 		Reply      []Reply   `json:"reply"`
 		IsAllMatch bool      `json:"is_all_match"`
@@ -139,6 +150,7 @@ func (b *Block) UnmarshalJSON(bb []byte) error {
 		return errors.NewError("JSONを構造体に変換できません", err)
 	}
 
+	b.name = j.Name
 	b.keyword = j.Keyword
 	b.reply = j.Reply
 	b.isAllMatch = j.IsAllMatch

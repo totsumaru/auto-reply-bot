@@ -8,6 +8,7 @@ import (
 
 // 全ての設定の更新をするブロックのリクエストです
 type BlockReq struct {
+	Name       string
 	Keyword    []string
 	Reply      []string
 	IsAllMatch bool
@@ -40,6 +41,12 @@ func (a *App) UpdateConfig(
 
 	blocks := make([]block.Block, 0)
 	for _, bReq := range blockReq {
+		// 名前
+		name, err := block.NewName(bReq.Name)
+		if err != nil {
+			return "", errors.NewError("ブロック名を作成できません", err)
+		}
+
 		// キーワード
 		keyword := make([]block.Keyword, 0)
 		{
@@ -66,7 +73,14 @@ func (a *App) UpdateConfig(
 			}
 		}
 
-		bl, err := block.NewBlock(keyword, reply, bReq.IsAllMatch, bReq.IsRandom, bReq.IsEmbed)
+		bl, err := block.NewBlock(
+			name,
+			keyword,
+			reply,
+			bReq.IsAllMatch,
+			bReq.IsRandom,
+			bReq.IsEmbed,
+		)
 		if err != nil {
 			return "", errors.NewError("ブロックを作成できません", err)
 		}
