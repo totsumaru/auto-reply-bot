@@ -37,7 +37,7 @@ var CmdCreateServer = cmd.CMD{
 			// Devであるかを検証します
 			if m.Member.User.ID != conf.TotsumaruDiscordID {
 				if err := message_send.SendEphemeralReply(s, m, "権限がありません"); err != nil {
-					message_send.SendInteractionErrMsg(s, m, err)
+					message_send.SendErrMsg(s, errors.NewError("権限エラーメッセージを送信できません", err))
 					return
 				}
 				return
@@ -46,7 +46,7 @@ var CmdCreateServer = cmd.CMD{
 
 		ctx, tx, err := shared.CreateDBTx()
 		if err != nil {
-			message_send.SendInteractionErrMsg(s, m, err)
+			message_send.SendErrMsg(s, errors.NewError("DBトランザクションを作成できません", err))
 			return
 		}
 
@@ -74,29 +74,29 @@ var CmdCreateServer = cmd.CMD{
 			// ロールバックを実行します
 			txErr := tx.Rollback()
 			if txErr != nil {
-				msg := errors.NewError("ロールバックに失敗しました。データに不整合が発生している可能性があります。")
-				message_send.SendInteractionErrMsg(s, m, msg)
+				msg := errors.NewError("ロールバックに失敗しました。データに不整合が発生している可能性があります。", txErr)
+				message_send.SendErrMsg(s, msg)
 				return
 			}
 
-			message_send.SendInteractionErrMsg(s, m, err)
+			message_send.SendErrMsg(s, errors.NewError("バックエンドの処理でエラーが発生しました", bffErr))
 			return
 		}
 
 		if txErr := tx.Commit(); txErr != nil {
-			message_send.SendInteractionErrMsg(s, m, err)
+			message_send.SendErrMsg(s, errors.NewError("コミットに失敗しました", err))
 			return
 		}
 
 		gl, err := s.Guild(apiRes.ID)
 		if err != nil {
-			message_send.SendInteractionErrMsg(s, m, err)
+			message_send.SendErrMsg(s, errors.NewError("ギルドを取得できません", err))
 			return
 		}
 
 		msg := fmt.Sprintf("ID: %s, Name: %s を追加しました", gl.ID, gl.Name)
 		if err := message_send.SendReplyInteraction(s, m, msg); err != nil {
-			message_send.SendInteractionErrMsg(s, m, err)
+			message_send.SendErrMsg(s, errors.NewError("インタラクションへの返信を送信できません", err))
 			return
 		}
 	},

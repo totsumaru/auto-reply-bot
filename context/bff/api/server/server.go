@@ -144,28 +144,28 @@ func getServer(c *gin.Context) {
 	}
 
 	if txErr := tx.Commit(); txErr != nil {
-		message_send.SendErrMsg(session, errors.NewError("Commitに失敗しました", bffErr))
+		message_send.SendErrMsg(session, errors.NewError("Commitに失敗しました", txErr))
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	guildName, err := guild.GetGuildName(session, apiRes.ID)
 	if err != nil {
-		message_send.SendErrMsg(session, errors.NewError("ギルド名を取得できません", bffErr))
+		message_send.SendErrMsg(session, errors.NewError("ギルド名を取得できません", err))
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	avatarURL, err := guild.GetAvatarURL(session, apiRes.ID)
 	if err != nil {
-		message_send.SendErrMsg(session, errors.NewError("アバターURLを取得できません", bffErr))
+		message_send.SendErrMsg(session, errors.NewError("アバターURLを取得できません", err))
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	allRoles, err := guild.GetAllRoles(session, apiRes.ID)
 	if err != nil {
-		message_send.SendErrMsg(session, errors.NewError("全てのロールを取得できません", bffErr))
+		message_send.SendErrMsg(session, errors.NewError("全てのロールを取得できません", err))
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}

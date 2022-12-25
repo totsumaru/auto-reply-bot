@@ -27,6 +27,14 @@ var CmdHelp = cmd.CMD{
 	Name:        CMDNameHelp,
 	Description: "設定に関する情報を表示します",
 	Handler: func(s *discordgo.Session, m *discordgo.InteractionCreate) {
+		// 検証します
+		{
+			// コマンドが正しいかを検証します
+			if m.Interaction.ApplicationCommandData().Name != CMDNameHelp {
+				return
+			}
+		}
+
 		req := message_send.SendMessageEmbedReq{
 			ChannelID: m.ChannelID,
 			Title:     "botについて",

@@ -6,7 +6,6 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/cmd"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/critical"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
@@ -37,7 +36,7 @@ var CmdDeleteServer = cmd.CMD{
 			// Devであるかを検証します
 			if m.Member.User.ID != conf.TotsumaruDiscordID {
 				if err := message_send.SendEphemeralReply(s, m, "権限がありません"); err != nil {
-					message_send.SendInteractionErrMsg(s, m, err)
+					message_send.SendErrMsg(s, errors.NewError("権限エラーメッセージを送信できません", err))
 					return
 				}
 				return
@@ -46,7 +45,7 @@ var CmdDeleteServer = cmd.CMD{
 
 		ctx, tx, err := shared.CreateDBTx()
 		if err != nil {
-			message_send.SendInteractionErrMsg(s, m, err)
+			message_send.SendErrMsg(s, errors.NewError("DBのTxを作成できません", err))
 			return
 		}
 
@@ -63,10 +62,11 @@ var CmdDeleteServer = cmd.CMD{
 				return errors.NewError("サーバーを作成できません", err)
 			}
 
+			// TODO: issue#10 削除時に退出させるか検討(pending)
 			// サーバーからbotを削除します
-			if err := critical.LeaveFromServer(s, id); err != nil {
-				return errors.NewError("サーバーからbotを削除できません", err)
-			}
+			//if err := critical.LeaveFromServer(s, id); err != nil {
+			//	return errors.NewError("サーバーからbotを削除できません", err)
+			//}
 
 			return nil
 		})()
@@ -75,29 +75,29 @@ var CmdDeleteServer = cmd.CMD{
 			// ロールバックを実行します
 			txErr := tx.Rollback()
 			if txErr != nil {
-				msg := errors.NewError("ロールバックに失敗しました。データに不整合が発生している可能性があります。")
-				message_send.SendInteractionErrMsg(s, m, msg)
+				msg := errors.NewError("ロールバックに失敗しました。データに不整合が発生している可能性があります。", txErr)
+				message_send.SendErrMsg(s, msg)
 				return
 			}
 
-			message_send.SendInteractionErrMsg(s, m, err)
+			message_send.SendErrMsg(s, errors.NewError("バックエンドの処理に失敗しました", bffErr))
 			return
 		}
 
 		if txErr := tx.Commit(); txErr != nil {
-			message_send.SendInteractionErrMsg(s, m, err)
+			message_send.SendErrMsg(s, errors.NewError("コミットに失敗しました", err))
 			return
 		}
 
 		gl, err := s.Guild(id)
 		if err != nil {
-			message_send.SendInteractionErrMsg(s, m, err)
+			message_send.SendErrMsg(s, errors.NewError("ギルドを取得できません", err))
 			return
 		}
 
 		msg := fmt.Sprintf("ID: %s, Name: %s を削除しました", gl.ID, gl.Name)
 		if err := message_send.SendReplyInteraction(s, m, msg); err != nil {
-			message_send.SendInteractionErrMsg(s, m, err)
+			message_send.SendErrMsg(s, errors.NewError("インタラクションの返信を送信できません", err))
 			return
 		}
 	},
