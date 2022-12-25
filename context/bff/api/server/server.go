@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/initiate"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
@@ -16,14 +17,18 @@ func Server(e *gin.Engine) {
 }
 
 // レスポンスです
-type ResGetServer struct {
-	ID          string              `json:"id"`
-	AdminRoleID string              `json:"admin_role_id"`
-	Block       []ResGetServerBlock `json:"block"`
+type Res struct {
+	ID          string     `json:"id"`
+	AdminRoleID string     `json:"admin_role_id"`
+	Block       []resBlock `json:"block"`
+	// 以下はComputedです
+	ServerName string    `json:"server_name"`
+	AvatarURL  string    `json:"avatar_url"`
+	Role       []resRole `json:"role"`
 }
 
 // ブロックのレスポンスです
-type ResGetServerBlock struct {
+type resBlock struct {
 	Name       string   `json:"name"`
 	Keyword    []string `json:"keyword"`
 	Reply      []string `json:"reply"`
@@ -32,18 +37,24 @@ type ResGetServerBlock struct {
 	IsEmbed    bool     `json:"is_embed"`
 }
 
+// ロールのレスポンスです
+type resRole struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 // サーバーを取得します
 func getServer(c *gin.Context) {
 	session, err := initiate.CreateSession()
 	if err != nil {
-		message_send.SendErrMsg(session, err)
+		message_send.SendErrMsg(session, errors.NewError("セッションを作成できません", err))
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	ctx, tx, err := shared.CreateDBTx()
 	if err != nil {
-		message_send.SendErrMsg(session, err)
+		message_send.SendErrMsg(session, errors.NewError("DBのTxを作成できません", err))
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
@@ -122,29 +133,54 @@ func getServer(c *gin.Context) {
 		if txErr != nil {
 			message_send.SendErrMsg(
 				session,
-				errors.NewError("ロールバックに失敗しました。データに不整合が発生している可能性があります。"),
+				errors.NewError("ロールバックに失敗しました。データに不整合が発生している可能性があります。", txErr),
 			)
 			return
 		}
 
-		message_send.SendErrMsg(session, bffErr)
+		message_send.SendErrMsg(session, errors.NewError("バックエンドの処理でエラーが発生しました", bffErr))
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	if txErr := tx.Commit(); txErr != nil {
-		message_send.SendErrMsg(session, err)
+		message_send.SendErrMsg(session, errors.NewError("Commitに失敗しました", bffErr))
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
-	res := ResGetServer{}
+	guildName, err := guild.GetGuildName(session, apiRes.ID)
+	if err != nil {
+		message_send.SendErrMsg(session, errors.NewError("ギルド名を取得できません", bffErr))
+		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
+		return
+	}
+
+	avatarURL, err := guild.GetAvatarURL(session, apiRes.ID)
+	if err != nil {
+		message_send.SendErrMsg(session, errors.NewError("アバターURLを取得できません", bffErr))
+		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
+		return
+	}
+
+	allRoles, err := guild.GetAllRoles(session, apiRes.ID)
+	if err != nil {
+		message_send.SendErrMsg(session, errors.NewError("全てのロールを取得できません", bffErr))
+		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
+		return
+	}
+
+	res := Res{}
 	res.ID = apiRes.ID
 	res.AdminRoleID = apiRes.AdminRoleID
-	res.Block = []ResGetServerBlock{}
+	res.Block = []resBlock{}
+	res.ServerName = guildName
+	res.AvatarURL = avatarURL
+	res.Role = []resRole{}
 
+	// レスポンスにブロックを追加します
 	for _, v := range apiRes.Block {
-		blockRes := ResGetServerBlock{}
+		blockRes := resBlock{}
 		blockRes.Name = v.Name
 		blockRes.Keyword = v.Keyword
 		blockRes.Reply = v.Reply
@@ -153,6 +189,16 @@ func getServer(c *gin.Context) {
 		blockRes.IsEmbed = v.IsEmbed
 
 		res.Block = append(res.Block, blockRes)
+	}
+
+	// レスポンスにロールを追加します
+	for roleID, roleName := range allRoles {
+		tmpRole := resRole{
+			ID:   roleID,
+			Name: roleName,
+		}
+
+		res.Role = append(res.Role, tmpRole)
 	}
 
 	c.Header("token", token)

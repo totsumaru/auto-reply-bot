@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/initiate"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
@@ -29,20 +30,30 @@ type ReqConfig struct {
 }
 
 // レスポンスです
-type ResGetServer struct {
-	ID          string              `json:"id"`
-	AdminRoleID string              `json:"admin_role_id"`
-	Block       []ResGetServerBlock `json:"block"`
+type Res struct {
+	ID          string     `json:"id"`
+	AdminRoleID string     `json:"admin_role_id"`
+	Block       []resBlock `json:"block"`
+	// 以下はComputedです
+	ServerName string    `json:"server_name"`
+	AvatarURL  string    `json:"avatar_url"`
+	Role       []resRole `json:"role"`
 }
 
 // ブロックのレスポンスです
-type ResGetServerBlock struct {
+type resBlock struct {
 	Name       string   `json:"name"`
 	Keyword    []string `json:"keyword"`
 	Reply      []string `json:"reply"`
 	IsAllMatch bool     `json:"is_all_match"`
 	IsRandom   bool     `json:"is_random"`
 	IsEmbed    bool     `json:"is_embed"`
+}
+
+// ロールのレスポンスです
+type resRole struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 // サーバーの設定を更新します
@@ -156,13 +167,37 @@ func postServerConfig(c *gin.Context) {
 		return
 	}
 
-	res := ResGetServer{}
+	guildName, err := guild.GetGuildName(session, apiRes.ID)
+	if err != nil {
+		message_send.SendErrMsg(session, errors.NewError("ギルド名を取得できません", bffErr))
+		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
+		return
+	}
+
+	avatarURL, err := guild.GetAvatarURL(session, apiRes.ID)
+	if err != nil {
+		message_send.SendErrMsg(session, errors.NewError("アバターURLを取得できません", bffErr))
+		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
+		return
+	}
+
+	allRoles, err := guild.GetAllRoles(session, apiRes.ID)
+	if err != nil {
+		message_send.SendErrMsg(session, errors.NewError("全てのロールを取得できません", bffErr))
+		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
+		return
+	}
+
+	res := Res{}
 	res.ID = apiRes.ID
 	res.AdminRoleID = apiRes.AdminRoleID
-	res.Block = []ResGetServerBlock{}
+	res.Block = []resBlock{}
+	res.ServerName = guildName
+	res.AvatarURL = avatarURL
+	res.Role = []resRole{}
 
 	for _, v := range apiRes.Block {
-		blockRes := ResGetServerBlock{}
+		blockRes := resBlock{}
 		blockRes.Name = v.Name
 		blockRes.Keyword = v.Keyword
 		blockRes.Reply = v.Reply
@@ -171,6 +206,16 @@ func postServerConfig(c *gin.Context) {
 		blockRes.IsEmbed = v.IsEmbed
 
 		res.Block = append(res.Block, blockRes)
+	}
+
+	// レスポンスにロールを追加します
+	for roleID, roleName := range allRoles {
+		tmpRole := resRole{
+			ID:   roleID,
+			Name: roleName,
+		}
+
+		res.Role = append(res.Role, tmpRole)
 	}
 
 	c.JSON(http.StatusOK, res)
