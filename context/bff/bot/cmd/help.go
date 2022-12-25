@@ -3,12 +3,18 @@ package cmd
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/cmd"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
-	"os"
+	"net/url"
 )
+
+// DiscordログインのURLテンプレートです
+//
+// fmt.Sprintf(DiscordLoginURLTmpl,{エンコードしたリダイレクトURL})
+const DiscordLoginURLTmpl = "https://discord.com/api/oauth2/authorize?client_id=1055348253614419989&redirect_uri=%s&response_type=code&scope=identify"
 
 const msg = `
 決められた条件に一致するコメントが送信された場合、
@@ -35,14 +41,17 @@ var CmdHelp = cmd.CMD{
 			}
 		}
 
-		url := fmt.Sprintf(
-			"%s?id=%s",
-			os.Getenv("FE_ROOT_URL"),
-			m.GuildID,
+		redirectURL := shared.CreateDiscordLoginRedirectURL(m.GuildID)
+
+		discordLoginURL := fmt.Sprintf(
+			DiscordLoginURLTmpl,
+			url.QueryEscape(redirectURL),
 		)
 
+		fmt.Println("URL: ", discordLoginURL)
+
 		if err := message_send.SendEmbedEphemeralReplyWithURLBtn(
-			s, m, "botについて", msg, url, conf.ColorYellow,
+			s, m, "botについて", msg, discordLoginURL, conf.ColorYellow,
 		); err != nil {
 			message_send.SendErrMsg(s, errors.NewError("helpコマンドに対する返信を遅れません", err))
 			return

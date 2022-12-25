@@ -5,6 +5,18 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )
 
+// ギルド構造体を取得します
+//
+// 基本的には個別のメソッドを推奨します。
+func GetGuild(s *discordgo.Session, guildID string) (*discordgo.Guild, error) {
+	g, err := s.Guild(guildID)
+	if err != nil {
+		return nil, errors.NewError("ギルドを取得できません", err)
+	}
+
+	return g, nil
+}
+
 // サーバー名を取得します
 func GetGuildName(s *discordgo.Session, guildID string) (string, error) {
 	g, err := s.Guild(guildID)
@@ -23,6 +35,16 @@ func GetAvatarURL(s *discordgo.Session, guildID string) (string, error) {
 	}
 
 	return g.IconURL(), nil
+}
+
+// ギルドの所有者(owner)を取得します
+func GetGuildOwnerID(s *discordgo.Session, guildID string) (string, error) {
+	g, err := s.Guild(guildID)
+	if err != nil {
+		return "", errors.NewError("ギルドを取得できません", err)
+	}
+
+	return g.OwnerID, nil
 }
 
 // 全てのロールを取得します

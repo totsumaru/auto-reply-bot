@@ -2,7 +2,7 @@ package convert
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 	"github.com/techstart35/auto-reply-bot/context/shared/map/seeker"
 	"log"
@@ -14,11 +14,7 @@ import (
 
 // codeからTokenを取得します
 func CodeToToken(code, serverID string) (string, error) {
-	redirectURI := fmt.Sprintf(
-		"%s/server?id=%s",
-		os.Getenv("FE_ROOT_URL"),
-		serverID,
-	)
+	redirectURI := shared.CreateDiscordLoginRedirectURL(serverID)
 
 	values := url.Values{}
 	values.Set("client_id", os.Getenv("DISCORD_CLIENT_ID"))
