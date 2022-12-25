@@ -50,12 +50,16 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 				}
 			}
 		} else {
+			isContain := false
 			// [1つでも含む場合]1つでも含んでいるキーワードがあれば終了
 			for _, keyword := range block.Keyword {
 				if strings.Contains(content, keyword) {
+					isContain = true
 					break
 				}
 			}
+			// 1つも含んでいない場合
+			mustReply = isContain
 		}
 
 		if mustReply {
