@@ -80,6 +80,7 @@ func main() {
 				"Content-Length",
 				"Accept-Encoding",
 				"Authorization",
+				"Token",
 			},
 			// cookieなどの情報を必要とするかどうか
 			//AllowCredentials: true,

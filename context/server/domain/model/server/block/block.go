@@ -79,8 +79,20 @@ func (b Block) validate() error {
 		return errors.NewError("返信の数が不正です")
 	}
 
+	// 同じキーワードが設定できないように制限
+	// ※同じ返信は設定できます
+	tmpKeyword := map[string]bool{}
+	for _, kw := range b.keyword {
+		if _, ok := tmpKeyword[kw.value]; ok {
+			return errors.NewError("キーワードが重複しています")
+		}
+
+		tmpKeyword[kw.value] = true
+	}
+
 	// ランダムではない時は返信は必ず1つ
 	if !b.isRandom {
+		// ※同じ返信は設定できます
 		if len(b.reply) > 1 {
 			return errors.NewError("ランダムではない場合は返信は1つしか記述できません")
 		}

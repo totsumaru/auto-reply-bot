@@ -61,7 +61,7 @@ func postServerConfig(c *gin.Context) {
 
 	id := c.Query("id")
 	// TODO: コメントアウト解除（FEの実装のため一時的にコメントアウト）
-	//token := c.GetHeader("token")
+	//token := c.GetHeader("Token")
 
 	// TODO: コメントアウト解除（FEの実装のため一時的にコメントアウト）
 	// 認証されているユーザーかを検証します
