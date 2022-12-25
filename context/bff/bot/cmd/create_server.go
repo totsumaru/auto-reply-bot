@@ -6,6 +6,7 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/cmd"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
@@ -88,13 +89,14 @@ var CmdCreateServer = cmd.CMD{
 			return
 		}
 
-		gl, err := s.Guild(apiRes.ID)
+		// ギルド名を取得します
+		guildName, err := guild.GetGuildName(s, apiRes.ID)
 		if err != nil {
 			message_send.SendErrMsg(s, errors.NewError("ギルドを取得できません", err))
 			return
 		}
 
-		msg := fmt.Sprintf("ID: %s, Name: %s を追加しました", gl.ID, gl.Name)
+		msg := fmt.Sprintf("ID: %s, Name: %s をDBに登録しました", apiRes.ID, guildName)
 		if err := message_send.SendReplyInteraction(s, m, msg); err != nil {
 			message_send.SendErrMsg(s, errors.NewError("インタラクションへの返信を送信できません", err))
 			return

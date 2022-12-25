@@ -60,14 +60,14 @@ type resRole struct {
 func postServerConfig(c *gin.Context) {
 	session, err := initiate.CreateSession()
 	if err != nil {
-		message_send.SendErrMsg(session, err)
+		message_send.SendErrMsg(session, errors.NewError("セッションを作成できません", err))
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	ctx, tx, err := shared.CreateDBTx()
 	if err != nil {
-		message_send.SendErrMsg(session, err)
+		message_send.SendErrMsg(session, errors.NewError("DBのTxを作成できません", err))
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
@@ -151,18 +151,18 @@ func postServerConfig(c *gin.Context) {
 		if txErr != nil {
 			message_send.SendErrMsg(
 				session,
-				errors.NewError("ロールバックに失敗しました。データに不整合が発生している可能性があります。"),
+				errors.NewError("ロールバックに失敗しました。データに不整合が発生している可能性があります。", txErr),
 			)
 			return
 		}
 
-		message_send.SendErrMsg(session, bffErr)
+		message_send.SendErrMsg(session, errors.NewError("バックエンドの処理でエラーが発生しました", bffErr))
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	if txErr := tx.Commit(); txErr != nil {
-		message_send.SendErrMsg(session, txErr)
+		message_send.SendErrMsg(session, errors.NewError("コミットに失敗しました", txErr))
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
