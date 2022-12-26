@@ -42,6 +42,11 @@ cd "${SCRIPT_DIR}"
 rm serve.sh
 echo "serve.sh を削除しました"
 
+# `start.sh`を削除
+cd "${SCRIPT_DIR}"
+rm start.sh
+echo "start.sh を削除しました"
+
 # `test-runner.sh`を削除
 cd "${SCRIPT_DIR}"
 rm test-runner.sh
