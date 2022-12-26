@@ -49,7 +49,7 @@ func (r Reply) validate() error {
 		return errors.NewError("値が空です", err)
 	}
 
-	if len(r.value) > ReplyMaxLen {
+	if len([]rune(r.value)) > ReplyMaxLen {
 		return errors.NewError("返信の文字数が上限を超えています")
 	}
 

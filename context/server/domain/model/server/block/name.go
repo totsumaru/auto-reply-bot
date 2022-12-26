@@ -49,7 +49,7 @@ func (n Name) validate() error {
 		return errors.NewError("値が空です", err)
 	}
 
-	if len(n.value) > NameMaxLen {
+	if len([]rune(n.value)) > NameMaxLen {
 		return errors.NewError("名前の文字数が上限を超えています")
 	}
 

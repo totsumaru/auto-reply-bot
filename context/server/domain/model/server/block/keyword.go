@@ -49,7 +49,7 @@ func (k Keyword) validate() error {
 		return errors.NewError("値が空です", err)
 	}
 
-	if len(k.value) > KeywordMaxLen {
+	if len([]rune(k.value)) > KeywordMaxLen {
 		return errors.NewError("キーワードの文字数が上限を超えています")
 	}
 
