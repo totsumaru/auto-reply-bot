@@ -12,12 +12,13 @@ import (
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 	"net/url"
+	"os"
 )
 
 // DiscordログインのURLテンプレートです
 //
-// fmt.Sprintf(DiscordLoginURLTmpl,{エンコードしたリダイレクトURL})
-const DiscordLoginURLTmpl = "https://discord.com/api/oauth2/authorize?client_id=1055348253614419989&redirect_uri=%s&response_type=code&scope=identify"
+// fmt.Sprintf(DiscordLoginURLTmpl,{ENVのDISCORD_CLIENT_ID},{エンコードしたリダイレクトURL})
+const DiscordLoginURLTmpl = "https://discord.com/api/oauth2/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=identify"
 
 const msg = `
 決められた条件に一致するコメントが送信された場合、
@@ -86,6 +87,7 @@ var CmdHelp = cmd.CMD{
 
 		discordLoginURL := fmt.Sprintf(
 			DiscordLoginURLTmpl,
+			os.Getenv("DISCORD_CLIENT_ID"),
 			url.QueryEscape(redirectURL),
 		)
 
