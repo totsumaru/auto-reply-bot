@@ -37,10 +37,17 @@ var CmdHelp = cmd.CMD{
 	Name:        CMDNameHelp,
 	Description: "設定に関する情報を表示します",
 	Handler: func(s *discordgo.Session, m *discordgo.InteractionCreate) {
+		// コマンドが実行されたサーバーのIDです
+		guildName, err := guild.GetGuildName(s, m.GuildID)
+		if err != nil {
+			message_send.SendErrMsg(s, errors.NewError("ギルド名を取得できません", err), "")
+			return
+		}
+
 		ctx, _, err := shared.CreateDBTx()
 		if err != nil {
 			message_send.SendEphemeralInteractionErrMsg(s, m, fmt.Errorf("エラーが発生しました"))
-			message_send.SendErrMsg(s, errors.NewError("DBトランザクションを作成できません", err))
+			message_send.SendErrMsg(s, errors.NewError("DBトランザクションを作成できません", err), guildName)
 			return
 		}
 
@@ -56,21 +63,21 @@ var CmdHelp = cmd.CMD{
 				tmpRes, err := v1.FindByID(ctx, m.GuildID)
 				if err != nil {
 					message_send.SendEphemeralInteractionErrMsg(s, m, fmt.Errorf("エラーが発生しました"))
-					message_send.SendErrMsg(s, errors.NewError("IDでサーバーを取得できません", err))
+					message_send.SendErrMsg(s, errors.NewError("IDでサーバーを取得できません", err), guildName)
 					return
 				}
 
 				ok, err := check.HasRole(s, m.GuildID, m.Member.User.ID, tmpRes.AdminRoleID)
 				if err != nil {
 					message_send.SendEphemeralInteractionErrMsg(s, m, fmt.Errorf("エラーが発生しました"))
-					message_send.SendErrMsg(s, errors.NewError("ロールの所有を確認できません", err))
+					message_send.SendErrMsg(s, errors.NewError("ロールの所有を確認できません", err), guildName)
 					return
 				}
 
 				guildOwnerID, err := guild.GetGuildOwnerID(s, m.GuildID)
 				if err != nil {
 					message_send.SendEphemeralInteractionErrMsg(s, m, fmt.Errorf("エラーが発生しました"))
-					message_send.SendErrMsg(s, errors.NewError("ギルドのオーナーIDを取得できません", err))
+					message_send.SendErrMsg(s, errors.NewError("ギルドのオーナーIDを取得できません", err), guildName)
 					return
 				}
 
@@ -94,7 +101,7 @@ var CmdHelp = cmd.CMD{
 		if err := message_send.SendEmbedEphemeralReplyWithURLBtn(
 			s, m, "botについて", msg, discordLoginURL, conf.ColorYellow,
 		); err != nil {
-			message_send.SendErrMsg(s, errors.NewError("helpコマンドに対する返信を遅れません", err))
+			message_send.SendErrMsg(s, errors.NewError("helpコマンドに対する返信を遅れません", err), guildName)
 			return
 		}
 	},

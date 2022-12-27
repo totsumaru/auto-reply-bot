@@ -18,14 +18,14 @@ func AddCommandHandler(s *discordgo.Session, m *discordgo.GuildCreate) {
 		// create-server: サーバーを作成します
 		_, err := discordCmd.AddCommand(s, m.Guild.ID, cmd.CmdCreateServer)
 		if err != nil {
-			message_send.SendErrMsg(s, errors.NewError("create-serverコマンドを追加できません", err))
+			message_send.SendErrMsg(s, errors.NewError("create-serverコマンドを追加できません", err), m.Guild.Name)
 			return
 		}
 
 		// delete-server: 登録を削除 & サーバーからbotを削除します
 		_, err = discordCmd.AddCommand(s, m.Guild.ID, cmd.CmdDeleteServer)
 		if err != nil {
-			message_send.SendErrMsg(s, errors.NewError("delete-serverコマンドを追加できません", err))
+			message_send.SendErrMsg(s, errors.NewError("delete-serverコマンドを追加できません", err), m.Guild.Name)
 			return
 		}
 	}
@@ -37,7 +37,7 @@ func AddCommandHandler(s *discordgo.Session, m *discordgo.GuildCreate) {
 	// help: 設定に関する情報を返します
 	_, err := discordCmd.AddCommand(s, m.Guild.ID, cmd.CmdHelp)
 	if err != nil {
-		message_send.SendErrMsg(s, errors.NewError("helpコマンドを追加できません", err))
+		message_send.SendErrMsg(s, errors.NewError("helpコマンドを追加できません", err), m.Guild.Name)
 		return
 	}
 }
