@@ -1,6 +1,7 @@
 package message_send
 
 import (
+	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
 	"github.com/techstart35/auto-reply-bot/context/shared/now"
@@ -8,10 +9,10 @@ import (
 )
 
 // エラーメッセージを送信します
-func SendErrMsg(s *discordgo.Session, e error) {
+func SendErrMsg(s *discordgo.Session, e error, serverName string) {
 	// エラーメッセージを送信します
 	embedInfo := &discordgo.MessageEmbed{
-		Title:       "エラーが発生しました",
+		Title:       fmt.Sprintf("エラー発生: @%s", serverName),
 		Description: e.Error(),
 		Color:       conf.ColorRed,
 		Timestamp:   now.GetNowTimeStamp(),

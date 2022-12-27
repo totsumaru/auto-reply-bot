@@ -28,6 +28,14 @@ var CmdCreateServer = cmd.CMD{
 	},
 	// コマンドが実行された時の処理です
 	Handler: func(s *discordgo.Session, m *discordgo.InteractionCreate) {
+		// コマンドが実行されたサーバーのIDです
+		// 引数のIDは、以下のargIDで取得しています
+		guildName, err := guild.GetGuildName(s, m.GuildID)
+		if err != nil {
+			message_send.SendErrMsg(s, errors.NewError("ギルド名を取得できません", err), "")
+			return
+		}
+
 		// 検証します
 		{
 			// コマンドが正しいかを検証します
@@ -38,7 +46,7 @@ var CmdCreateServer = cmd.CMD{
 			// Devであるかを検証します
 			if m.Member.User.ID != conf.TotsumaruDiscordID {
 				if err := message_send.SendEphemeralReply(s, m, "権限がありません"); err != nil {
-					message_send.SendErrMsg(s, errors.NewError("権限エラーメッセージを送信できません", err))
+					message_send.SendErrMsg(s, errors.NewError("権限エラーメッセージを送信できません", err), guildName)
 					return
 				}
 				return
@@ -47,7 +55,7 @@ var CmdCreateServer = cmd.CMD{
 
 		ctx, tx, err := shared.CreateDBTx()
 		if err != nil {
-			message_send.SendErrMsg(s, errors.NewError("DBトランザクションを作成できません", err))
+			message_send.SendErrMsg(s, errors.NewError("DBトランザクションを作成できません", err), guildName)
 			return
 		}
 
@@ -55,15 +63,15 @@ var CmdCreateServer = cmd.CMD{
 			apiRes = v1.Res{}
 		)
 
-		var id string
+		var argID string
 		for _, v := range m.Interaction.ApplicationCommandData().Options {
 			if v.Name == "server-id" {
-				id = v.Value.(string)
+				argID = v.Value.(string)
 			}
 		}
 
 		bffErr := (func() error {
-			apiRes, err = v1.CreateServer(s, ctx, id)
+			apiRes, err = v1.CreateServer(s, ctx, argID)
 			if err != nil {
 				return errors.NewError("サーバーを作成できません", err)
 			}
@@ -76,29 +84,22 @@ var CmdCreateServer = cmd.CMD{
 			txErr := tx.Rollback()
 			if txErr != nil {
 				msg := errors.NewError("ロールバックに失敗しました。データに不整合が発生している可能性があります。", txErr)
-				message_send.SendErrMsg(s, msg)
+				message_send.SendErrMsg(s, msg, guildName)
 				return
 			}
 
-			message_send.SendErrMsg(s, errors.NewError("バックエンドの処理でエラーが発生しました", bffErr))
+			message_send.SendErrMsg(s, errors.NewError("バックエンドの処理でエラーが発生しました", bffErr), guildName)
 			return
 		}
 
 		if txErr := tx.Commit(); txErr != nil {
-			message_send.SendErrMsg(s, errors.NewError("コミットに失敗しました", err))
-			return
-		}
-
-		// ギルド名を取得します
-		guildName, err := guild.GetGuildName(s, apiRes.ID)
-		if err != nil {
-			message_send.SendErrMsg(s, errors.NewError("ギルドを取得できません", err))
+			message_send.SendErrMsg(s, errors.NewError("コミットに失敗しました", err), guildName)
 			return
 		}
 
 		msg := fmt.Sprintf("ID: %s, Name: %s をDBに登録しました", apiRes.ID, guildName)
 		if err := message_send.SendReplyInteraction(s, m, msg); err != nil {
-			message_send.SendErrMsg(s, errors.NewError("インタラクションへの返信を送信できません", err))
+			message_send.SendErrMsg(s, errors.NewError("インタラクションへの返信を送信できません", err), guildName)
 			return
 		}
 	},

@@ -24,7 +24,7 @@ func NoticeHandler(s *discordgo.Session, m *discordgo.GuildCreate) {
 
 	if err := message_send.SendMessageEmbed(s, req); err != nil {
 		message_send.SendErrMsg(
-			s, errors.NewError("新規サーバー導入時の通知を送信できません", err),
+			s, errors.NewError("新規サーバー導入時の通知を送信できません", err), m.Guild.Name,
 		)
 	}
 }

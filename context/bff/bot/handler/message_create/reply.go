@@ -4,6 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
@@ -24,17 +25,23 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	guildName, err := guild.GetGuildName(s, m.GuildID)
+	if err != nil {
+		message_send.SendErrMsg(s, errors.NewError("ギルド名を取得できません", err), "")
+		return
+	}
+
 	content := m.Content
 
 	ctx, _, err := shared.CreateDBTx()
 	if err != nil {
-		message_send.SendErrMsg(s, errors.NewError("Txを作成できません", err))
+		message_send.SendErrMsg(s, errors.NewError("Txを作成できません", err), guildName)
 		return
 	}
 
 	apiRes, err := v1.FindByID(ctx, m.GuildID)
 	if err != nil {
-		message_send.SendErrMsg(s, errors.NewError("IDでサーバーを取得できません", err))
+		message_send.SendErrMsg(s, errors.NewError("IDでサーバーを取得できません", err), guildName)
 		return
 	}
 
@@ -80,13 +87,13 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 					Reference: m.Reference(),
 				}
 				if err = message_send.SendReplyEmbed(s, req); err != nil {
-					message_send.SendErrMsg(s, errors.NewError("埋め込みの返信を送信できません", err))
+					message_send.SendErrMsg(s, errors.NewError("埋め込みの返信を送信できません", err), guildName)
 					return
 				}
 			} else {
 				// 通常のテキストメッセージを送信します
 				if err = message_send.SendReply(s, m.GuildID, m.ChannelID, m.ID, msg); err != nil {
-					message_send.SendErrMsg(s, errors.NewError("返信を送信できません", err))
+					message_send.SendErrMsg(s, errors.NewError("返信を送信できません", err), guildName)
 					return
 				}
 			}

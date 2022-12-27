@@ -63,14 +63,14 @@ type resRole struct {
 func postServerConfig(c *gin.Context) {
 	session, err := initiate.CreateSession()
 	if err != nil {
-		message_send.SendErrMsg(session, errors.NewError("セッションを作成できません", err))
+		message_send.SendErrMsg(session, errors.NewError("セッションを作成できません", err), "none")
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	ctx, tx, err := shared.CreateDBTx()
 	if err != nil {
-		message_send.SendErrMsg(session, errors.NewError("DBのTxを作成できません", err))
+		message_send.SendErrMsg(session, errors.NewError("DBのTxを作成できません", err), "none")
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
@@ -78,38 +78,45 @@ func postServerConfig(c *gin.Context) {
 	id := c.Query("id")
 	token := c.GetHeader("Token")
 
+	// クエリパラメータに指定されたサーバーです
+	guildName, err := guild.GetGuildName(session, id)
+	if err != nil {
+		message_send.SendErrMsg(session, errors.NewError("ギルド名を取得できません", err), "")
+		return
+	}
+
 	// 認証されているユーザーかを検証します
 	{
 		tmpRes, err := v1.FindByID(ctx, id)
 		if err != nil {
-			message_send.SendErrMsg(session, errors.NewError("IDでサーバーを取得できません", err))
+			message_send.SendErrMsg(session, errors.NewError("IDでサーバーを取得できません", err), guildName)
 			c.JSON(http.StatusUnauthorized, "認証されていません")
 			return
 		}
 
 		userID, err := convert.TokenToDiscordID(token)
 		if err != nil {
-			message_send.SendErrMsg(session, errors.NewError("トークンをDiscordIDに変換できません", err))
+			message_send.SendErrMsg(session, errors.NewError("トークンをDiscordIDに変換できません", err), guildName)
 			c.JSON(http.StatusUnauthorized, "認証されていません")
 			return
 		}
 
 		ok, err := check.HasRole(session, id, userID, tmpRes.AdminRoleID)
 		if err != nil {
-			message_send.SendErrMsg(session, errors.NewError("ロールの所有確認に失敗しました", err))
+			message_send.SendErrMsg(session, errors.NewError("ロールの所有確認に失敗しました", err), guildName)
 			c.JSON(http.StatusUnauthorized, "認証されていません")
 			return
 		}
 
 		guildOwnerID, err := guild.GetGuildOwnerID(session, id)
 		if err != nil {
-			message_send.SendErrMsg(session, errors.NewError("オーナーIDを取得できません", err))
+			message_send.SendErrMsg(session, errors.NewError("オーナーIDを取得できません", err), guildName)
 			c.JSON(http.StatusUnauthorized, "認証されていません")
 			return
 		}
 
 		if !(ok || userID == guildOwnerID || userID == conf.TotsumaruDiscordID) {
-			message_send.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"))
+			message_send.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"), guildName)
 			c.JSON(http.StatusUnauthorized, "認証されていません")
 			return
 		}
@@ -153,38 +160,32 @@ func postServerConfig(c *gin.Context) {
 			message_send.SendErrMsg(
 				session,
 				errors.NewError("ロールバックに失敗しました。データに不整合が発生している可能性があります。", txErr),
+				guildName,
 			)
 			return
 		}
 
-		message_send.SendErrMsg(session, errors.NewError("バックエンドの処理でエラーが発生しました", bffErr))
+		message_send.SendErrMsg(session, errors.NewError("バックエンドの処理でエラーが発生しました", bffErr), guildName)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	if txErr := tx.Commit(); txErr != nil {
-		message_send.SendErrMsg(session, errors.NewError("コミットに失敗しました", txErr))
-		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
-		return
-	}
-
-	guildName, err := guild.GetGuildName(session, apiRes.ID)
-	if err != nil {
-		message_send.SendErrMsg(session, errors.NewError("ギルド名を取得できません", err))
+		message_send.SendErrMsg(session, errors.NewError("コミットに失敗しました", txErr), guildName)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	avatarURL, err := guild.GetAvatarURL(session, apiRes.ID)
 	if err != nil {
-		message_send.SendErrMsg(session, errors.NewError("アバターURLを取得できません", err))
+		message_send.SendErrMsg(session, errors.NewError("アバターURLを取得できません", err), guildName)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
 	allRoles, err := guild.GetAllRoles(session, apiRes.ID)
 	if err != nil {
-		message_send.SendErrMsg(session, errors.NewError("全てのロールを取得できません", err))
+		message_send.SendErrMsg(session, errors.NewError("全てのロールを取得できません", err), guildName)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
