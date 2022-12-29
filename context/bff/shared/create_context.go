@@ -14,17 +14,17 @@ func CreateDBTx() (context.Context, *sql.Tx, error) {
 
 	conf, err := db.NewConf()
 	if err != nil {
-		return ctx, tx, errors.NewError("DBのConfを作成できません")
+		return ctx, tx, errors.NewError("DBのConfを作成できません", err)
 	}
 
 	database, err := db.NewDB(conf)
 	if err != nil {
-		return ctx, tx, errors.NewError("DBを作成できません")
+		return ctx, tx, errors.NewError("DBを作成できません", err)
 	}
 
 	tx, err = database.Begin()
 	if err != nil {
-		return ctx, tx, errors.NewError("DB開始のTxを作成できません")
+		return ctx, tx, errors.NewError("DB開始のTxを作成できません", err)
 	}
 
 	ctx = context.WithValue(context.Background(), "tx", tx)
