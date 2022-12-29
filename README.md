@@ -16,6 +16,20 @@
 
 [テスト用のbotの導入はこちら](https://discord.com/api/oauth2/authorize?client_id=1055348253614419989&permissions=412317207552&scope=bot)
 
+## 新規サーバーへの導入手順
+
+1. TwitterのDMに依頼をもらう
+2. 無料期間を案内した後、[Google Form](https://forms.gle/6pmaX1bX7bdzvvGi9)を送る → 回答後に導入URLあり
+3. ※ユーザー対応: URLからbotの導入
+4. `/create-server`コマンドでDBにレコードを作成
+5. [botのコンパネ](https://discord.com/developers/applications/1056843645967413309/oauth2/general)からリダイレクトURLを設定
+6. [Notion](https://www.notion.so/bot-92d5460b67d3407893343008d1821a49)に情報を追加
+
+## 有料移行時の手順
+
+1. 終了5日前に有料に移行するか聞く（しない場合はbotを削除してもらって終了）
+2. stripeのURL（）を送付
+
 ## インフラ構成
 
 - FE: Cloudflare Pages
