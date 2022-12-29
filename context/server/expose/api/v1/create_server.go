@@ -43,5 +43,10 @@ func CreateServer(s *discordgo.Session, ctx context.Context, serverID string) (R
 		return res, errors.NewError("レスポンスを作成できません", err)
 	}
 
+	// storeに値を保存します
+	if err = updateStore(res); err != nil {
+		return res, errors.NewError("storeを更新できません", err)
+	}
+
 	return res, nil
 }

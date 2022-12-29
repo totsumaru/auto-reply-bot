@@ -9,6 +9,7 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/bff/bot/handler/guild_create"
 	"github.com/techstart35/auto-reply-bot/context/bff/bot/handler/interaction_create"
 	"github.com/techstart35/auto-reply-bot/context/bff/bot/handler/message_create"
+	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"log"
 	"os"
 	"os/signal"
@@ -27,6 +28,11 @@ func init() {
 		loc = time.FixedZone(location, 9*60*60)
 	}
 	time.Local = loc
+
+	// storeの値を初期化します
+	if err = shared.InitStore(); err != nil {
+		panic(err)
+	}
 }
 
 func main() {

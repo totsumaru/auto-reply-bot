@@ -19,6 +19,12 @@ func (a *App) DeleteServer(serverID string) error {
 		return errors.NewError("サーバーを作成できません", err)
 	}
 
+	// 存在確認をします
+	_, err = a.Repo.FindByID(i)
+	if err != nil {
+		return errors.NewError("削除予定のサーバーを取得できません", err)
+	}
+
 	if err = a.Repo.Delete(u.ID()); err != nil {
 		return errors.NewError("サーバーを削除できません", err)
 	}

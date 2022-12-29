@@ -2,7 +2,6 @@ package message_create
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
@@ -33,13 +32,7 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	content := m.Content
 
-	ctx, _, err := shared.CreateDBTx()
-	if err != nil {
-		message_send.SendErrMsg(s, errors.NewError("Txを作成できません", err), guildName)
-		return
-	}
-
-	apiRes, err := v1.FindByID(ctx, m.GuildID)
+	apiRes, err := v1.GetStoreRes(m.GuildID)
 	if err != nil {
 		message_send.SendErrMsg(s, errors.NewError("IDでサーバーを取得できません", err), guildName)
 		return

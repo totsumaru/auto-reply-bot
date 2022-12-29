@@ -25,5 +25,10 @@ func DeleteServer(s *discordgo.Session, ctx context.Context, serverID string) er
 		return errors.NewError("サーバーを削除できません", err)
 	}
 
+	// storeから値を削除します
+	if err = removeStore(serverID); err != nil {
+		return errors.NewError("storeから値を削除できません", err)
+	}
+
 	return nil
 }

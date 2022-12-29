@@ -45,7 +45,7 @@ func TestDeleteServer(t *testing.T) {
 		)
 
 		// テスト対象のAPIをコールします
-		if err := v1.DeleteServer(&discordgo.Session{}, ctx, TestID); err != nil {
+		if err := v1.DeleteServer(&discordgo.Session{}, ctx, TestID); err == nil {
 			t.Fatal("エラーが返されなかった")
 		}
 	})
