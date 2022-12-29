@@ -26,6 +26,7 @@ const msg = `
 
 ■ 各種URL
 ・[管理者に問い合わせ(Twitter)](https://twitter.com/totsumaru_dot)
+・[botの使い方](https://note.com/tech_start35/n/n3abec9183fed)
 
 ■ お知らせ
 ・設定画面は以下のボタンからアクセスしてください
