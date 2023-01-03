@@ -1,6 +1,7 @@
 package module_test
 
 import (
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/block"
 	"github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/map/gen"
 	"reflect"
@@ -28,7 +29,7 @@ func TestFindByID(t *testing.T) {
 				{"value": "r1"},
 				{"value": "r2"},
 			})
-			gen.Gen(blockMock, []string{"is_all_match"}, true)
+			gen.Gen(blockMock, []string{"match_condition", "value"}, block.MatchConditionOneContain)
 			gen.Gen(blockMock, []string{"is_random"}, true)
 			gen.Gen(blockMock, []string{"is_embed"}, true)
 
@@ -66,7 +67,7 @@ func TestFindByID(t *testing.T) {
 			t.Fatal("期待した値と一致しません")
 		}
 
-		if !blockRes.IsAllMatch {
+		if blockRes.MatchCondition != block.MatchConditionOneContain {
 			t.Fatal("期待した値と一致しません")
 		}
 

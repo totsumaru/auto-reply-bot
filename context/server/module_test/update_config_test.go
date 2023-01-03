@@ -2,6 +2,7 @@ package module_test
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/block"
 	"github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"reflect"
 	"testing"
@@ -25,12 +26,12 @@ func TestUpdateConfig(t *testing.T) {
 
 		// テスト対象のAPIをコールします
 		blockReq1 := v1.BlockReq{
-			Name:       "foo",
-			Keyword:    []string{"k1", "k2"},
-			Reply:      []string{"r1", "r2"},
-			IsAllMatch: true,
-			IsRandom:   true,
-			IsEmbed:    true,
+			Name:           "foo",
+			Keyword:        []string{"k1", "k2"},
+			Reply:          []string{"r1", "r2"},
+			MatchCondition: block.MatchConditionAllContain,
+			IsRandom:       true,
+			IsEmbed:        true,
 		}
 
 		res, err := v1.UpdateConfig(
@@ -53,12 +54,12 @@ func TestUpdateConfig(t *testing.T) {
 		}
 
 		expectBlockRes := v1.BlockRes{
-			Name:       "foo",
-			Keyword:    []string{"k1", "k2"},
-			Reply:      []string{"r1", "r2"},
-			IsAllMatch: true,
-			IsRandom:   true,
-			IsEmbed:    true,
+			Name:           "foo",
+			Keyword:        []string{"k1", "k2"},
+			Reply:          []string{"r1", "r2"},
+			MatchCondition: block.MatchConditionAllContain,
+			IsRandom:       true,
+			IsEmbed:        true,
 		}
 
 		if !reflect.DeepEqual(res.Block, []v1.BlockRes{expectBlockRes}) {

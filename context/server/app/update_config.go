@@ -8,12 +8,12 @@ import (
 
 // 全ての設定の更新をするブロックのリクエストです
 type BlockReq struct {
-	Name       string
-	Keyword    []string
-	Reply      []string
-	IsAllMatch bool
-	IsRandom   bool
-	IsEmbed    bool
+	Name           string
+	Keyword        []string
+	Reply          []string
+	MatchCondition string
+	IsRandom       bool
+	IsEmbed        bool
 }
 
 // 全ての設定を更新します
@@ -73,11 +73,17 @@ func (a *App) UpdateConfig(
 			}
 		}
 
+		// 一致条件
+		matchCondition, err := block.NewMatchCondition(bReq.MatchCondition)
+		if err != nil {
+			return "", errors.NewError("一致条件を作成できません", err)
+		}
+
 		bl, err := block.NewBlock(
 			name,
 			keyword,
 			reply,
-			bReq.IsAllMatch,
+			matchCondition,
 			bReq.IsRandom,
 			bReq.IsEmbed,
 		)

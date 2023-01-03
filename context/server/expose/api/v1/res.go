@@ -13,12 +13,12 @@ type Res struct {
 
 // ブロックのレスポンスです
 type BlockRes struct {
-	Name       string
-	Keyword    []string
-	Reply      []string
-	IsAllMatch bool
-	IsRandom   bool
-	IsEmbed    bool
+	Name           string
+	Keyword        []string
+	Reply          []string
+	MatchCondition string
+	IsRandom       bool
+	IsEmbed        bool
 }
 
 // レスポンスを作成します
@@ -40,7 +40,7 @@ func CreateRes(m map[string]interface{}) (Res, error) {
 		b.Name = seeker.Str(bl, []string{"name", "value"})
 		b.Keyword = kw
 		b.Reply = rep
-		b.IsAllMatch = seeker.Bool(bl, []string{"is_all_match"})
+		b.MatchCondition = seeker.Str(bl, []string{"match_condition", "value"})
 		b.IsRandom = seeker.Bool(bl, []string{"is_random"})
 		b.IsEmbed = seeker.Bool(bl, []string{"is_embed"})
 
