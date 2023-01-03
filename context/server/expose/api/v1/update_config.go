@@ -11,12 +11,12 @@ import (
 
 // ブロックのリクエストです
 type BlockReq struct {
-	Name       string
-	Keyword    []string
-	Reply      []string
-	IsAllMatch bool
-	IsRandom   bool
-	IsEmbed    bool
+	Name           string
+	Keyword        []string
+	Reply          []string
+	MatchCondition string
+	IsRandom       bool
+	IsEmbed        bool
 }
 
 // 設定を更新します
@@ -48,12 +48,12 @@ func UpdateConfig(
 	appBlockReq := make([]app.BlockReq, 0)
 	for _, v := range blockReq {
 		bl := app.BlockReq{
-			Name:       v.Name,
-			Keyword:    v.Keyword,
-			Reply:      v.Reply,
-			IsAllMatch: v.IsAllMatch,
-			IsRandom:   v.IsRandom,
-			IsEmbed:    v.IsEmbed,
+			Name:           v.Name,
+			Keyword:        v.Keyword,
+			Reply:          v.Reply,
+			MatchCondition: v.MatchCondition,
+			IsRandom:       v.IsRandom,
+			IsEmbed:        v.IsEmbed,
 		}
 
 		appBlockReq = append(appBlockReq, bl)

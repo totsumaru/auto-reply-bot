@@ -9,6 +9,7 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/initiate"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/block"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 	"net/http"
@@ -23,12 +24,13 @@ func ServerConfig(e *gin.Engine) {
 type ReqConfig struct {
 	AdminRoleID string `json:"admin_role_id"`
 	Block       []struct {
-		Name       string   `json:"name"`
-		Keyword    []string `json:"keyword"`
-		Reply      []string `json:"reply"`
-		IsAllMatch bool     `json:"is_all_match"`
-		IsRandom   bool     `json:"is_random"`
-		IsEmbed    bool     `json:"is_embed"`
+		Name           string   `json:"name"`
+		Keyword        []string `json:"keyword"`
+		Reply          []string `json:"reply"`
+		IsAllMatch     bool     `json:"is_all_match"`
+		MatchCondition string   `json:"match_condition"`
+		IsRandom       bool     `json:"is_random"`
+		IsEmbed        bool     `json:"is_embed"`
 	} `json:"block"`
 }
 
@@ -45,12 +47,13 @@ type Res struct {
 
 // ブロックのレスポンスです
 type resBlock struct {
-	Name       string   `json:"name"`
-	Keyword    []string `json:"keyword"`
-	Reply      []string `json:"reply"`
-	IsAllMatch bool     `json:"is_all_match"`
-	IsRandom   bool     `json:"is_random"`
-	IsEmbed    bool     `json:"is_embed"`
+	Name           string   `json:"name"`
+	Keyword        []string `json:"keyword"`
+	Reply          []string `json:"reply"`
+	IsAllMatch     bool     `json:"is_all_match"`
+	MatchCondition string   `json:"match_condition"`
+	IsRandom       bool     `json:"is_random"`
+	IsEmbed        bool     `json:"is_embed"`
 }
 
 // ロールのレスポンスです
@@ -135,11 +138,19 @@ func postServerConfig(c *gin.Context) {
 		apiReqBlocks := make([]v1.BlockReq, 0)
 
 		for _, rb := range req.Block {
+			// TODO: FEが準備できたら削除
+			var matchCondition string
+			if rb.IsAllMatch {
+				matchCondition = block.MatchConditionAllContain
+			} else {
+				matchCondition = block.MatchConditionOneContain
+			}
+
 			apiBlockReq := v1.BlockReq{}
 			apiBlockReq.Name = rb.Name
 			apiBlockReq.Keyword = rb.Keyword
 			apiBlockReq.Reply = rb.Reply
-			apiBlockReq.IsAllMatch = rb.IsAllMatch
+			apiBlockReq.MatchCondition = matchCondition
 			apiBlockReq.IsRandom = rb.IsRandom
 			apiBlockReq.IsEmbed = rb.IsEmbed
 
@@ -199,11 +210,17 @@ func postServerConfig(c *gin.Context) {
 	res.Role = []resRole{}
 
 	for _, v := range apiRes.Block {
+		// TODO: FEができたら削除
+		isAllMatch := true
+		if v.MatchCondition == block.MatchConditionOneContain {
+			isAllMatch = false
+		}
+
 		blockRes := resBlock{}
 		blockRes.Name = v.Name
 		blockRes.Keyword = v.Keyword
 		blockRes.Reply = v.Reply
-		blockRes.IsAllMatch = v.IsAllMatch
+		blockRes.IsAllMatch = isAllMatch
 		blockRes.IsRandom = v.IsRandom
 		blockRes.IsEmbed = v.IsEmbed
 

@@ -5,6 +5,7 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
+	block2 "github.com/techstart35/auto-reply-bot/context/server/domain/model/server/block"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 	"math/rand"
@@ -41,7 +42,19 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 	for _, block := range apiRes.Block {
 		mustReply := true
 
-		if block.IsAllMatch {
+		switch block.MatchCondition {
+		case block2.MatchConditionOneContain:
+			isContain := false
+			// [1つでも含む場合]1つでも含んでいるキーワードがあれば、
+			// isContainをtrueにしてここのループを終了
+			for _, keyword := range block.Keyword {
+				if strings.Contains(content, keyword) {
+					isContain = true
+					break
+				}
+			}
+			mustReply = isContain
+		case block2.MatchConditionAllContain:
 			// [全て含む場合]1つでも含んでいないキーワードがあれば終了
 			for _, keyword := range block.Keyword {
 				if !strings.Contains(content, keyword) {
@@ -49,17 +62,11 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 					break
 				}
 			}
-		} else {
-			isContain := false
-			// [1つでも含む場合]1つでも含んでいるキーワードがあれば終了
-			for _, keyword := range block.Keyword {
-				if strings.Contains(content, keyword) {
-					isContain = true
-					break
-				}
+		case block2.MatchConditionPerfectMatch:
+			// 完全一致の場合はキーワードは必ず1つのため、indexで指定しています
+			if content == block.Keyword[0] {
+				mustReply = true
 			}
-			// 1つも含んでいない場合
-			mustReply = isContain
 		}
 
 		if mustReply {

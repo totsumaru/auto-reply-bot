@@ -15,12 +15,12 @@ const (
 
 // ブロックです
 type Block struct {
-	name       Name
-	keyword    []Keyword
-	reply      []Reply
-	isAllMatch bool // キーワードの完全一致フラグ(true=and, false=or)
-	isRandom   bool // 返信のランダムフラグ
-	isEmbed    bool // 埋め込みフラグ
+	name           Name
+	keyword        []Keyword
+	reply          []Reply
+	matchCondition MatchCondition
+	isRandom       bool // 返信のランダムフラグ
+	isEmbed        bool // 埋め込みフラグ
 }
 
 // ブロックを作成します
@@ -28,7 +28,7 @@ func NewBlock(
 	n Name,
 	kw []Keyword,
 	r []Reply,
-	isAllMention bool,
+	matchCondition MatchCondition,
 	isRandom bool,
 	isEmbed bool,
 ) (Block, error) {
@@ -36,7 +36,7 @@ func NewBlock(
 	b.name = n
 	b.keyword = kw
 	b.reply = r
-	b.isAllMatch = isAllMention
+	b.matchCondition = matchCondition
 	b.isRandom = isRandom
 	b.isEmbed = isEmbed
 
@@ -62,9 +62,9 @@ func (b Block) Reply() []Reply {
 	return b.reply
 }
 
-// 完全一致フラグを取得します
-func (b Block) IsAllMatch() bool {
-	return b.isAllMatch
+// 一致条件を取得します
+func (b Block) MatchCondition() MatchCondition {
+	return b.matchCondition
 }
 
 // ランダムフラグを取得します
@@ -112,19 +112,19 @@ func (b Block) validate() error {
 // 構造体をJSONに変換します
 func (b Block) MarshalJSON() ([]byte, error) {
 	j := struct {
-		Name       Name      `json:"name"`
-		Keyword    []Keyword `json:"keyword"`
-		Reply      []Reply   `json:"reply"`
-		IsAllMatch bool      `json:"is_all_match"`
-		IsRandom   bool      `json:"is_random"`
-		IsEmbed    bool      `json:"is_embed"`
+		Name           Name           `json:"name"`
+		Keyword        []Keyword      `json:"keyword"`
+		Reply          []Reply        `json:"reply"`
+		MatchCondition MatchCondition `json:"match_condition"`
+		IsRandom       bool           `json:"is_random"`
+		IsEmbed        bool           `json:"is_embed"`
 	}{
-		Name:       b.name,
-		Keyword:    b.keyword,
-		Reply:      b.reply,
-		IsAllMatch: b.isAllMatch,
-		IsRandom:   b.isRandom,
-		IsEmbed:    b.isEmbed,
+		Name:           b.name,
+		Keyword:        b.keyword,
+		Reply:          b.reply,
+		MatchCondition: b.matchCondition,
+		IsRandom:       b.isRandom,
+		IsEmbed:        b.isEmbed,
 	}
 
 	bb, err := json.Marshal(j)
@@ -138,22 +138,44 @@ func (b Block) MarshalJSON() ([]byte, error) {
 // JSONを構造体に変換します
 func (b *Block) UnmarshalJSON(bb []byte) error {
 	j := &struct {
-		Name       Name      `json:"name"`
-		Keyword    []Keyword `json:"keyword"`
-		Reply      []Reply   `json:"reply"`
-		IsAllMatch bool      `json:"is_all_match"`
-		IsRandom   bool      `json:"is_random"`
-		IsEmbed    bool      `json:"is_embed"`
+		Name           Name           `json:"name"`
+		Keyword        []Keyword      `json:"keyword"`
+		Reply          []Reply        `json:"reply"`
+		IsAllMatch     bool           `json:"is_all_match"` // TODO: DBが全て変わったら削除
+		MatchCondition MatchCondition `json:"match_condition"`
+		IsRandom       bool           `json:"is_random"`
+		IsEmbed        bool           `json:"is_embed"`
 	}{}
 
 	if err := json.Unmarshal(bb, j); err != nil {
 		return errors.NewError("JSONを構造体に変換できません", err)
 	}
 
+	// TODO: DBが全て変わったら削除
+	// MatchConditionがが入っていない場合は、ここで変換します
+	tmpMatchCondition := j.MatchCondition
+	if tmpMatchCondition.IsEmpty() {
+		if j.IsAllMatch {
+			c, err := NewMatchCondition(MatchConditionAllContain)
+			if err != nil {
+				return errors.NewError("一致条件を作成できません", err)
+			}
+
+			tmpMatchCondition = c
+		} else {
+			c, err := NewMatchCondition(MatchConditionOneContain)
+			if err != nil {
+				return errors.NewError("一致条件を作成できません", err)
+			}
+
+			tmpMatchCondition = c
+		}
+	}
+
 	b.name = j.Name
 	b.keyword = j.Keyword
 	b.reply = j.Reply
-	b.isAllMatch = j.IsAllMatch
+	b.matchCondition = tmpMatchCondition
 	b.isRandom = j.IsRandom
 	b.isEmbed = j.IsEmbed
 
