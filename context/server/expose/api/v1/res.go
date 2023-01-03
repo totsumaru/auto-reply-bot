@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/block"
 	"github.com/techstart35/auto-reply-bot/context/shared/map/seeker"
 )
 
@@ -37,21 +36,11 @@ func CreateRes(m map[string]interface{}) (Res, error) {
 			rep = append(rep, seeker.Str(r, []string{"value"}))
 		}
 
-		// TODO: DBが全て更新されたら削除(修正)
-		matchCondition := seeker.Str(bl, []string{"match_condition", "value"})
-		if matchCondition == "" {
-			if seeker.Bool(bl, []string{"is_all_match"}) {
-				matchCondition = block.MatchConditionAllContain
-			} else {
-				matchCondition = block.MatchConditionOneContain
-			}
-		}
-
 		b := BlockRes{}
 		b.Name = seeker.Str(bl, []string{"name", "value"})
 		b.Keyword = kw
 		b.Reply = rep
-		b.MatchCondition = matchCondition
+		b.MatchCondition = seeker.Str(bl, []string{"match_condition", "value"})
 		b.IsRandom = seeker.Bool(bl, []string{"is_random"})
 		b.IsEmbed = seeker.Bool(bl, []string{"is_embed"})
 

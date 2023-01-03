@@ -87,7 +87,7 @@ GET /server
         "good",
         "very good"
       ],
-      "is_all_match": true,
+      "match_condition": "all-match",
       "is_random": true,
       "is_embed": false
     }
@@ -148,7 +148,7 @@ POST /server/config
         "good",
         "very good"
       ],
-      "is_all_match": true,
+      "match_condition": "all-match",
       "is_random": true,
       "is_embed": false
     }
@@ -173,7 +173,7 @@ POST /server/config
         "good",
         "very good"
       ],
-      "is_all_match": true,
+      "match_condition": "all-match",
       "is_random": true,
       "is_embed": false
     }
