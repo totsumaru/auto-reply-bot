@@ -63,9 +63,9 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 				}
 			}
 		case block2.MatchConditionPerfectMatch:
-			// 完全一致の場合はキーワードは必ず1つのため、indexで指定しています
-			if content == block.Keyword[0] {
-				mustReply = true
+			// 完全一致の場合はキーワードは必ず1つのため、index[0]で指定しています
+			if content != block.Keyword[0] {
+				mustReply = false
 			}
 		}
 
