@@ -9,7 +9,6 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/initiate"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
-	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/block"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 	"net/http"
@@ -37,7 +36,6 @@ type resBlock struct {
 	Name           string   `json:"name"`
 	Keyword        []string `json:"keyword"`
 	Reply          []string `json:"reply"`
-	IsAllMatch     bool     `json:"is_all_match"` // TODO: FEの対応後、削除
 	MatchCondition string   `json:"match_condition"`
 	IsRandom       bool     `json:"is_random"`
 	IsEmbed        bool     `json:"is_embed"`
@@ -184,17 +182,10 @@ func getServer(c *gin.Context) {
 
 	// レスポンスにブロックを追加します
 	for _, v := range apiRes.Block {
-		// TODO: FEの対応後、削除
-		isAllMatch := true
-		if v.MatchCondition == block.MatchConditionOneContain {
-			isAllMatch = false
-		}
-
 		blockRes := resBlock{}
 		blockRes.Name = v.Name
 		blockRes.Keyword = v.Keyword
 		blockRes.Reply = v.Reply
-		blockRes.IsAllMatch = isAllMatch
 		blockRes.MatchCondition = v.MatchCondition
 		blockRes.IsRandom = v.IsRandom
 		blockRes.IsEmbed = v.IsEmbed
