@@ -106,6 +106,13 @@ func (b Block) validate() error {
 		}
 	}
 
+	// 完全一致の場合はキーワードは必ず1つ
+	if b.matchCondition.String() == MatchConditionPerfectMatch {
+		if len(b.keyword) > 1 {
+			return errors.NewError("完全一致の場合はキーワードは1つしか設定できません")
+		}
+	}
+
 	return nil
 }
 
