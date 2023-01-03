@@ -148,7 +148,6 @@ func (b *Block) UnmarshalJSON(bb []byte) error {
 		Name           Name           `json:"name"`
 		Keyword        []Keyword      `json:"keyword"`
 		Reply          []Reply        `json:"reply"`
-		IsAllMatch     bool           `json:"is_all_match"` // TODO: DBが全て変わったら削除
 		MatchCondition MatchCondition `json:"match_condition"`
 		IsRandom       bool           `json:"is_random"`
 		IsEmbed        bool           `json:"is_embed"`
@@ -158,31 +157,10 @@ func (b *Block) UnmarshalJSON(bb []byte) error {
 		return errors.NewError("JSONを構造体に変換できません", err)
 	}
 
-	// TODO: DBが全て変わったら削除
-	// MatchConditionがが入っていない場合は、ここで変換します
-	tmpMatchCondition := j.MatchCondition
-	if tmpMatchCondition.IsEmpty() {
-		if j.IsAllMatch {
-			c, err := NewMatchCondition(MatchConditionAllContain)
-			if err != nil {
-				return errors.NewError("一致条件を作成できません", err)
-			}
-
-			tmpMatchCondition = c
-		} else {
-			c, err := NewMatchCondition(MatchConditionOneContain)
-			if err != nil {
-				return errors.NewError("一致条件を作成できません", err)
-			}
-
-			tmpMatchCondition = c
-		}
-	}
-
 	b.name = j.Name
 	b.keyword = j.Keyword
 	b.reply = j.Reply
-	b.matchCondition = tmpMatchCondition
+	b.matchCondition = j.MatchCondition
 	b.isRandom = j.IsRandom
 	b.isEmbed = j.IsEmbed
 
