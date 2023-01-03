@@ -139,11 +139,13 @@ func postServerConfig(c *gin.Context) {
 
 		for _, rb := range req.Block {
 			// TODO: FEが準備できたら削除
-			var matchCondition string
-			if rb.IsAllMatch {
-				matchCondition = block.MatchConditionAllContain
-			} else {
-				matchCondition = block.MatchConditionOneContain
+			matchCondition := rb.MatchCondition
+			if matchCondition == "" {
+				if rb.IsAllMatch {
+					matchCondition = block.MatchConditionAllContain
+				} else {
+					matchCondition = block.MatchConditionOneContain
+				}
 			}
 
 			apiBlockReq := v1.BlockReq{}
