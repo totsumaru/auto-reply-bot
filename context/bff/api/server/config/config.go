@@ -223,6 +223,7 @@ func postServerConfig(c *gin.Context) {
 		blockRes.Keyword = v.Keyword
 		blockRes.Reply = v.Reply
 		blockRes.IsAllMatch = isAllMatch
+		blockRes.MatchCondition = v.MatchCondition
 		blockRes.IsRandom = v.IsRandom
 		blockRes.IsEmbed = v.IsEmbed
 
