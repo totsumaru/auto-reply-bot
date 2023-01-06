@@ -8,7 +8,7 @@ import (
 
 const (
 	// ブロックの上限数です
-	BlockMaxAmount = 10
+	BlockMaxAmount = 30
 )
 
 // Discordのサーバーです
