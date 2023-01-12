@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/techstart35/auto-reply-bot/context/bff/api/server"
 	"github.com/techstart35/auto-reply-bot/context/bff/api/server/config"
-	nickname "github.com/techstart35/auto-reply-bot/context/bff/api/server/nockname"
+	"github.com/techstart35/auto-reply-bot/context/bff/api/server/nickname"
 )
 
 // ルートを設定します

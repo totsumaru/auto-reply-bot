@@ -20,6 +20,12 @@ func Nickname(e *gin.Engine) {
 	e.POST("/server/nickname", postNickname)
 }
 
+// レスポンスです
+type Res struct {
+	ID       string `json:"id"`
+	Nickname string `json:"nickname"`
+}
+
 // ニックネームを変更します
 func postNickname(c *gin.Context) {
 	session, err := initiate.CreateSession()
@@ -90,5 +96,9 @@ func postNickname(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, "")
+	res := Res{}
+	res.ID = id
+	res.Nickname = nickname
+
+	c.JSON(http.StatusOK, res)
 }
