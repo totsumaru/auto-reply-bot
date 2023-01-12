@@ -12,6 +12,7 @@ import (
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 	"net/http"
+	"os"
 )
 
 // サーバーを取得します
@@ -29,6 +30,7 @@ type Res struct {
 	ServerName string    `json:"server_name"`
 	AvatarURL  string    `json:"avatar_url"`
 	Role       []resRole `json:"role"`
+	Nickname   string    `json:"nickname"`
 }
 
 // ブロックのレスポンスです
@@ -171,6 +173,13 @@ func getServer(c *gin.Context) {
 		return
 	}
 
+	m, err := session.GuildMember(id, os.Getenv("DISCORD_APPLICATION_ID"))
+	if err != nil {
+		message_send.SendErrMsg(session, errors.NewError("botのMember情報を取得できません", err), guildName)
+		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
+		return
+	}
+
 	res := Res{}
 	res.ID = apiRes.ID
 	res.AdminRoleID = apiRes.AdminRoleID
@@ -179,6 +188,7 @@ func getServer(c *gin.Context) {
 	res.ServerName = guildName
 	res.AvatarURL = avatarURL
 	res.Role = []resRole{}
+	res.Nickname = m.Nick
 
 	// レスポンスにブロックを追加します
 	for _, v := range apiRes.Block {
