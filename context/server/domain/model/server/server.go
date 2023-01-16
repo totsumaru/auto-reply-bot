@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/block"
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/rule"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )
 
@@ -17,6 +18,7 @@ type Server struct {
 	id          model.ID
 	adminRoleID model.RoleID
 	block       []block.Block
+	rule        rule.Rule
 }
 
 // Discordのサーバーを作成します
@@ -25,6 +27,7 @@ func NewServer(id model.ID) (*Server, error) {
 	s.id = id
 	s.adminRoleID = model.RoleID{}
 	s.block = []block.Block{}
+	s.rule = rule.Rule{}
 
 	if err := s.validate(); err != nil {
 		return s, errors.NewError("検証に失敗しました", err)
@@ -59,6 +62,17 @@ func (u *Server) UpdateBlock(b []block.Block) error {
 	return nil
 }
 
+// ルールを更新します
+func (u *Server) UpdateRule(r rule.Rule) error {
+	u.rule = r
+
+	if err := u.validate(); err != nil {
+		return errors.NewError("検証に失敗しました", err)
+	}
+
+	return nil
+}
+
 // -------------------
 // getter
 // -------------------
@@ -76,6 +90,11 @@ func (u *Server) AdminRoleID() model.RoleID {
 // ブロックを取得します
 func (u *Server) Block() []block.Block {
 	return u.block
+}
+
+// ルールを取得します
+func (u *Server) Rule() rule.Rule {
+	return u.rule
 }
 
 // -------------------
@@ -101,10 +120,12 @@ func (u *Server) MarshalJSON() ([]byte, error) {
 		ID          model.ID      `json:"id"`
 		AdminRoleID model.RoleID  `json:"admin_role_id"`
 		Block       []block.Block `json:"block"`
+		Rule        rule.Rule     `json:"rule"`
 	}{
 		ID:          u.id,
 		AdminRoleID: u.adminRoleID,
 		Block:       u.block,
+		Rule:        u.rule,
 	}
 
 	b, err := json.Marshal(j)
@@ -121,6 +142,7 @@ func (u *Server) UnmarshalJSON(b []byte) error {
 		ID          model.ID      `json:"id"`
 		AdminRoleID model.RoleID  `json:"admin_role_id"`
 		Block       []block.Block `json:"block"`
+		Rule        rule.Rule     `json:"rule"`
 	}{}
 
 	if err := json.Unmarshal(b, &j); err != nil {
@@ -130,6 +152,7 @@ func (u *Server) UnmarshalJSON(b []byte) error {
 	u.id = j.ID
 	u.adminRoleID = j.AdminRoleID
 	u.block = j.Block
+	u.rule = j.Rule
 
 	return nil
 }
