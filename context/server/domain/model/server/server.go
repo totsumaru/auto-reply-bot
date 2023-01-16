@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/block"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )
@@ -13,16 +14,16 @@ const (
 
 // Discordのサーバーです
 type Server struct {
-	id          ID
-	adminRoleID RoleID
+	id          model.ID
+	adminRoleID model.RoleID
 	block       []block.Block
 }
 
 // Discordのサーバーを作成します
-func NewServer(id ID) (*Server, error) {
+func NewServer(id model.ID) (*Server, error) {
 	s := &Server{}
 	s.id = id
-	s.adminRoleID = RoleID{}
+	s.adminRoleID = model.RoleID{}
 	s.block = []block.Block{}
 
 	if err := s.validate(); err != nil {
@@ -37,7 +38,7 @@ func NewServer(id ID) (*Server, error) {
 // -------------------
 
 // 管理者のロールIDを更新します
-func (u *Server) UpdateAdminRoleID(admin RoleID) error {
+func (u *Server) UpdateAdminRoleID(admin model.RoleID) error {
 	u.adminRoleID = admin
 
 	if err := u.validate(); err != nil {
@@ -63,12 +64,12 @@ func (u *Server) UpdateBlock(b []block.Block) error {
 // -------------------
 
 // IDを取得します
-func (u *Server) ID() ID {
+func (u *Server) ID() model.ID {
 	return u.id
 }
 
 // 管理者のロールIDを取得します
-func (u *Server) AdminRoleID() RoleID {
+func (u *Server) AdminRoleID() model.RoleID {
 	return u.adminRoleID
 }
 
@@ -97,8 +98,8 @@ func (u *Server) validate() error {
 // 構造体をJSONに変換します
 func (u *Server) MarshalJSON() ([]byte, error) {
 	j := struct {
-		ID          ID            `json:"id"`
-		AdminRoleID RoleID        `json:"admin_role_id"`
+		ID          model.ID      `json:"id"`
+		AdminRoleID model.RoleID  `json:"admin_role_id"`
 		Block       []block.Block `json:"block"`
 	}{
 		ID:          u.id,
@@ -117,8 +118,8 @@ func (u *Server) MarshalJSON() ([]byte, error) {
 // JSONを構造体を変換します
 func (u *Server) UnmarshalJSON(b []byte) error {
 	j := &struct {
-		ID          ID            `json:"id"`
-		AdminRoleID RoleID        `json:"admin_role_id"`
+		ID          model.ID      `json:"id"`
+		AdminRoleID model.RoleID  `json:"admin_role_id"`
 		Block       []block.Block `json:"block"`
 	}{}
 

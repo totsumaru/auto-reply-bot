@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server"
 )
 
@@ -9,8 +10,8 @@ import (
 type Repository interface {
 	Create(u *server.Server) error
 	Update(u *server.Server) error
-	Delete(discordID server.ID) error
-	FindByID(id server.ID) (*server.Server, error)
+	Delete(discordID model.ID) error
+	FindByID(id model.ID) (*server.Server, error)
 	FindAll() (map[string]*server.Server, error)
 }
 

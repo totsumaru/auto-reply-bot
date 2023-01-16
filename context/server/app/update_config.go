@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server"
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/block"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )
@@ -24,7 +24,7 @@ func (a *App) UpdateConfig(
 	adminRoleID string,
 	blockReq []BlockReq,
 ) (string, error) {
-	i, err := server.NewID(serverID)
+	i, err := model.NewID(serverID)
 	if err != nil {
 		return "", errors.NewError("idを作成できません", err)
 	}
@@ -34,7 +34,7 @@ func (a *App) UpdateConfig(
 		return "", errors.NewError("IDでサーバーを取得できません", err)
 	}
 
-	roleID, err := server.NewRoleID(adminRoleID)
+	roleID, err := model.NewRoleID(adminRoleID)
 	if err != nil {
 		return "", errors.NewError("管理者のロールIDを作成できません", err)
 	}

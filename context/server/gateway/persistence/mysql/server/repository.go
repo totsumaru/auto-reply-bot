@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server"
 	"github.com/techstart35/auto-reply-bot/context/server/gateway/persistence/mysql"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
@@ -106,7 +107,7 @@ func (r *Repository) Update(u *server.Server) error {
 }
 
 // 削除します
-func (r *Repository) Delete(id server.ID) error {
+func (r *Repository) Delete(id model.ID) error {
 	qs := fmt.Sprintf(
 		`DELETE FROM %s WHERE %s =?`,
 		Conf.TableName,
@@ -128,7 +129,7 @@ func (r *Repository) Delete(id server.ID) error {
 }
 
 // IDでサーバーを取得します
-func (r *Repository) FindByID(id server.ID) (*server.Server, error) {
+func (r *Repository) FindByID(id model.ID) (*server.Server, error) {
 	qs := fmt.Sprintf(
 		`SELECT %s, %s, %s, %s FROM %s WHERE %s = ? FOR UPDATE`,
 		Conf.ColumnName.ID,
