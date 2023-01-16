@@ -39,8 +39,8 @@ func NewURL(
 	allowRoleID []model.RoleID,
 	allowChannelID []model.ChannelID,
 	alertChannelID model.ChannelID,
-) (*URL, error) {
-	u := &URL{}
+) (URL, error) {
+	u := URL{}
 	u.isRestrict = isRestrict
 	u.isYoutubeAllow = isYoutubeAllow
 	u.isTwitterAllow = isTwitterAllow
@@ -57,7 +57,7 @@ func NewURL(
 }
 
 // メッセージが許可されているか検証します
-func (u *URL) IsAllowedURLMessage(
+func (u URL) IsAllowedURLMessage(
 	authorRoleID model.RoleID,
 	channelID model.ChannelID,
 	msg string,
@@ -111,37 +111,37 @@ func (u *URL) IsAllowedURLMessage(
 }
 
 // URL制限をするかを取得します
-func (u *URL) IsRestrict() bool {
+func (u URL) IsRestrict() bool {
 	return u.isRestrict
 }
 
 // Youtubeを許可するかを取得します
-func (u *URL) IsYoutubeAllow() bool {
+func (u URL) IsYoutubeAllow() bool {
 	return u.isYoutubeAllow
 }
 
 // Twitterを許可するかを取得します
-func (u *URL) IsTwitterAllow() bool {
+func (u URL) IsTwitterAllow() bool {
 	return u.isTwitterAllow
 }
 
 // GIFを許可するかを取得します
-func (u *URL) IsGIFAllow() bool {
+func (u URL) IsGIFAllow() bool {
 	return u.isGIFAllow
 }
 
 // URL制限を受けないロールを取得します
-func (u *URL) AllowRoleID() []model.RoleID {
+func (u URL) AllowRoleID() []model.RoleID {
 	return u.allowRoleID
 }
 
 // URL制限を受けないチャンネルを取得します
-func (u *URL) AllowChannelID() []model.ChannelID {
+func (u URL) AllowChannelID() []model.ChannelID {
 	return u.allowChannelID
 }
 
 // アラートを通知するチャンネルを取得します
-func (u *URL) AlertChannelID() model.ChannelID {
+func (u URL) AlertChannelID() model.ChannelID {
 	return u.alertChannelID
 }
 
@@ -150,7 +150,7 @@ func (u *URL) AlertChannelID() model.ChannelID {
 // -------------------
 
 // 検証します
-func (u *URL) validate() error {
+func (u URL) validate() error {
 	// ロールの数を検証します
 	if len(u.allowRoleID) > AllowRoleMAX {
 		return errors.NewError("ロールの数が上限を超えています")
@@ -169,7 +169,7 @@ func (u *URL) validate() error {
 // -------------------
 
 // 構造体をJSONに変換します
-func (u *URL) MarshalJSON() ([]byte, error) {
+func (u URL) MarshalJSON() ([]byte, error) {
 	j := struct {
 		IsRestrict     bool              `json:"is_restrict"`
 		IsYoutubeAllow bool              `json:"is_youtube_allow"`

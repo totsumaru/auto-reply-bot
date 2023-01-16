@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/block"
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/rule"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )
 
@@ -16,6 +17,17 @@ type BlockReq struct {
 	IsEmbed        bool
 }
 
+// URL制御のリクエストです
+type URLRuleReq struct {
+	IsRestrict     bool
+	IsYoutubeAllow bool
+	IsTwitterAllow bool
+	IsGIFAllow     bool
+	AllowRoleID    []string
+	AllowChannelID []string
+	AlertChannelID string
+}
+
 // 全ての設定を更新します
 //
 // IDを返します。
@@ -23,6 +35,7 @@ func (a *App) UpdateConfig(
 	serverID string,
 	adminRoleID string,
 	blockReq []BlockReq,
+	urlRuleReq URLRuleReq,
 ) (string, error) {
 	i, err := model.NewID(serverID)
 	if err != nil {
@@ -94,6 +107,52 @@ func (a *App) UpdateConfig(
 		blocks = append(blocks, bl)
 	}
 
+	// URLのルールを作成します
+	urlRule := rule.URL{}
+	{
+		allowRoleID := make([]model.RoleID, 0)
+		for _, v := range urlRuleReq.AllowRoleID {
+			alRoleID, err := model.NewRoleID(v)
+			if err != nil {
+				return "", errors.NewError("ロールIDを作成できません", err)
+			}
+			allowRoleID = append(allowRoleID, alRoleID)
+		}
+
+		allowChannelID := make([]model.ChannelID, 0)
+		for _, v := range urlRuleReq.AllowChannelID {
+			alChID, err := model.NewChannelID(v)
+			if err != nil {
+				return "", errors.NewError("チャンネルIDを作成できません", err)
+			}
+			allowChannelID = append(allowChannelID, alChID)
+		}
+
+		alertChannelID, err := model.NewChannelID(urlRuleReq.AlertChannelID)
+		if err != nil {
+			return "", errors.NewError("アラートを送信するチャンネルIDを作成できません", err)
+		}
+
+		urlRule, err = rule.NewURL(
+			urlRuleReq.IsRestrict,
+			urlRuleReq.IsYoutubeAllow,
+			urlRuleReq.IsTwitterAllow,
+			urlRuleReq.IsGIFAllow,
+			allowRoleID,
+			allowChannelID,
+			alertChannelID,
+		)
+		if err != nil {
+			return "", errors.NewError("URLのルールを作成できません", err)
+		}
+	}
+
+	// ルールを作成します
+	r, err := rule.NewRule(urlRule)
+	if err != nil {
+		return "", errors.NewError("ルールを作成できません", err)
+	}
+
 	// ロールIDを更新します
 	if err = s.UpdateAdminRoleID(roleID); err != nil {
 		return "", errors.NewError("管理者のロールIDを更新できません", err)
@@ -102,6 +161,11 @@ func (a *App) UpdateConfig(
 	// ブロックを更新します
 	if err = s.UpdateBlock(blocks); err != nil {
 		return "", errors.NewError("ブロックを更新できません", err)
+	}
+
+	// ルールを更新します
+	if err = s.UpdateRule(r); err != nil {
+		return "", errors.NewError("ルールを更新できません", err)
 	}
 
 	if err = a.Repo.Update(s); err != nil {

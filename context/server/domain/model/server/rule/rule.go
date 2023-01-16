@@ -11,8 +11,8 @@ type Rule struct {
 }
 
 // ルールを作成します
-func NewRule(url URL) (*Rule, error) {
-	s := &Rule{}
+func NewRule(url URL) (Rule, error) {
+	s := Rule{}
 	s.url = url
 
 	if err := s.validate(); err != nil {
@@ -23,12 +23,12 @@ func NewRule(url URL) (*Rule, error) {
 }
 
 // URLを取得します
-func (u *Rule) URL() URL {
+func (u Rule) URL() URL {
 	return u.url
 }
 
 // 検証します
-func (u *Rule) validate() error {
+func (u Rule) validate() error {
 	return nil
 }
 
@@ -37,7 +37,7 @@ func (u *Rule) validate() error {
 // -------------------
 
 // 構造体をJSONに変換します
-func (u *Rule) MarshalJSON() ([]byte, error) {
+func (u Rule) MarshalJSON() ([]byte, error) {
 	j := struct {
 		URL URL `json:"url"`
 	}{

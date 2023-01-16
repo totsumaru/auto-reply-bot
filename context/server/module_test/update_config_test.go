@@ -34,12 +34,23 @@ func TestUpdateConfig(t *testing.T) {
 			IsEmbed:        true,
 		}
 
+		urlRuleReq := v1.URLRuleReq{
+			IsRestrict:     true,
+			IsYoutubeAllow: true,
+			IsTwitterAllow: true,
+			IsGIFAllow:     true,
+			AllowRoleID:    []string{"r1", "r2"},
+			AllowChannelID: []string{"c1", "c2"},
+			AlertChannelID: "a1",
+		}
+
 		res, err := v1.UpdateConfig(
 			&discordgo.Session{},
 			ctx,
 			TestID,
 			TestAdminRoleID,
 			[]v1.BlockReq{blockReq1},
+			urlRuleReq,
 		)
 		if err != nil {
 			t.Fatal(err)
@@ -54,15 +65,39 @@ func TestUpdateConfig(t *testing.T) {
 		}
 
 		expectBlockRes := v1.BlockRes{
-			Name:           "foo",
-			Keyword:        []string{"k1", "k2"},
-			Reply:          []string{"r1", "r2"},
-			MatchCondition: block.MatchConditionAllContain,
-			IsRandom:       true,
-			IsEmbed:        true,
+			Name:           blockReq1.Name,
+			Keyword:        blockReq1.Keyword,
+			Reply:          blockReq1.Reply,
+			MatchCondition: blockReq1.MatchCondition,
+			IsRandom:       blockReq1.IsRandom,
+			IsEmbed:        blockReq1.IsEmbed,
 		}
 
 		if !reflect.DeepEqual(res.Block, []v1.BlockRes{expectBlockRes}) {
+			t.Fatal("期待した値と一致しません")
+		}
+		if res.Rule.URL.IsRestrict != urlRuleReq.IsRestrict {
+			t.Fatal("期待した値と一致しません")
+		}
+		if res.Rule.URL.IsYoutubeAllow != urlRuleReq.IsYoutubeAllow {
+			t.Fatal("期待した値と一致しません")
+		}
+		if res.Rule.URL.IsTwitterAllow != urlRuleReq.IsTwitterAllow {
+			t.Fatal("期待した値と一致しません")
+		}
+		if res.Rule.URL.IsGIFAllow != urlRuleReq.IsGIFAllow {
+			t.Fatal("期待した値と一致しません")
+		}
+		if !reflect.DeepEqual(res.Rule.URL.AllowRoleID, urlRuleReq.AllowRoleID) {
+			t.Fatal("期待した値と一致しません")
+		}
+		if !reflect.DeepEqual(res.Rule.URL.AllowRoleID, urlRuleReq.AllowRoleID) {
+			t.Fatal("期待した値と一致しません")
+		}
+		if !reflect.DeepEqual(res.Rule.URL.AllowChannelID, urlRuleReq.AllowChannelID) {
+			t.Fatal("期待した値と一致しません")
+		}
+		if res.Rule.URL.AlertChannelID != urlRuleReq.AlertChannelID {
 			t.Fatal("期待した値と一致しません")
 		}
 	})

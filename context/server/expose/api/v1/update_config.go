@@ -19,6 +19,17 @@ type BlockReq struct {
 	IsEmbed        bool
 }
 
+// URL制限のリクエストです
+type URLRuleReq struct {
+	IsRestrict     bool
+	IsYoutubeAllow bool
+	IsTwitterAllow bool
+	IsGIFAllow     bool
+	AllowRoleID    []string
+	AllowChannelID []string
+	AlertChannelID string
+}
+
 // 設定を更新します
 //
 // 管理者ロールを持っている or 該当サーバーの管理者権限 のみがコールできます。
@@ -28,6 +39,7 @@ func UpdateConfig(
 	serverID string,
 	adminRoleID string,
 	blockReq []BlockReq,
+	urlRuleReq URLRuleReq,
 ) (Res, error) {
 	res := Res{}
 
@@ -59,7 +71,9 @@ func UpdateConfig(
 		appBlockReq = append(appBlockReq, bl)
 	}
 
-	appResID, err := a.UpdateConfig(serverID, adminRoleID, appBlockReq)
+	appURLRuleReq := app.URLRuleReq(urlRuleReq)
+
+	appResID, err := a.UpdateConfig(serverID, adminRoleID, appBlockReq, appURLRuleReq)
 	if err != nil {
 		return res, errors.NewError("設定を更新できません", err)
 	}

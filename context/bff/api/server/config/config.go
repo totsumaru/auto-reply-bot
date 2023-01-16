@@ -30,6 +30,17 @@ type ReqConfig struct {
 		IsRandom       bool     `json:"is_random"`
 		IsEmbed        bool     `json:"is_embed"`
 	} `json:"block"`
+	Rule struct {
+		URL struct {
+			IsRestrict     bool     `json:"is_restrict"`
+			IsYoutubeAllow bool     `json:"is_youtube_allow"`
+			IsTwitterAllow bool     `json:"is_twitter_allow"`
+			IsGIFAllow     bool     `json:"is_gif_allow"`
+			AllowRoleID    []string `json:"allow_role_id"`
+			AllowChannelID []string `json:"allow_channel_id"`
+			AlertChannelID string   `json:"alert_channel_id"`
+		} `json:"url"`
+	} `json:"rule"`
 }
 
 // レスポンスです
@@ -146,7 +157,17 @@ func postServerConfig(c *gin.Context) {
 			apiReqBlocks = append(apiReqBlocks, apiBlockReq)
 		}
 
-		apiRes, err = v1.UpdateConfig(session, ctx, id, req.AdminRoleID, apiReqBlocks)
+		apiRuleReq := v1.URLRuleReq{
+			IsRestrict:     req.Rule.URL.IsRestrict,
+			IsYoutubeAllow: req.Rule.URL.IsYoutubeAllow,
+			IsTwitterAllow: req.Rule.URL.IsTwitterAllow,
+			IsGIFAllow:     req.Rule.URL.IsGIFAllow,
+			AllowRoleID:    req.Rule.URL.AllowRoleID,
+			AllowChannelID: req.Rule.URL.AllowChannelID,
+			AlertChannelID: req.Rule.URL.AlertChannelID,
+		}
+
+		apiRes, err = v1.UpdateConfig(session, ctx, id, req.AdminRoleID, apiReqBlocks, apiRuleReq)
 		if err != nil {
 			return errors.NewError("設定を更新できません", err)
 		}
