@@ -8,4 +8,5 @@ import (
 func Handler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	Reply(s, m)
 	Weather(s, m)
+	URL(s, m)
 }

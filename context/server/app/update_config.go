@@ -128,7 +128,11 @@ func (a *App) UpdateConfig(
 			allowChannelID = append(allowChannelID, alChID)
 		}
 
-		alertChannelID, err := model.NewChannelID(urlRuleReq.AlertChannelID)
+		alChID := urlRuleReq.AlertChannelID
+		if alChID == "" {
+			alChID = "none"
+		}
+		alertChannelID, err := model.NewChannelID(alChID)
 		if err != nil {
 			return "", errors.NewError("アラートを送信するチャンネルIDを作成できません", err)
 		}

@@ -33,13 +33,13 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	content := m.Content
 
-	apiRes, err := v1.GetStoreRes(m.GuildID)
+	storeRes, err := v1.GetStoreRes(m.GuildID)
 	if err != nil {
 		message_send.SendErrMsg(s, errors.NewError("IDでサーバーを取得できません", err), guildName)
 		return
 	}
 
-	for _, block := range apiRes.Block {
+	for _, block := range storeRes.Block {
 		mustReply := true
 
 		switch block.MatchCondition {

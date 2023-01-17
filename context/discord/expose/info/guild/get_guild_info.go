@@ -68,3 +68,28 @@ func GetAllRoles(s *discordgo.Session, guildID string) (map[string]string, error
 
 	return res, nil
 }
+
+// 全てのテキストチャンネルを取得します
+//
+// チャンネルID:チャンネル名 のmapを返します。
+func GetAllTextChannels(s *discordgo.Session, guildID string) (map[string]string, error) {
+	res := map[string]string{}
+
+	channels, err := s.GuildChannels(guildID)
+	if err != nil {
+		return res, errors.NewError("チャンネル一覧を取得できません", err)
+	}
+
+	for _, channel := range channels {
+		if _, ok := res[channel.ID]; ok {
+			return res, errors.NewError("チャンネルが重複しています")
+		}
+
+		// テキストチャンネルのみ追加します
+		if channel.Type == discordgo.ChannelTypeGuildText {
+			res[channel.ID] = channel.Name
+		}
+	}
+
+	return res, nil
+}

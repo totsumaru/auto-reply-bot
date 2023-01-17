@@ -26,11 +26,23 @@ type Res struct {
 	AdminRoleID string     `json:"admin_role_id"`
 	Block       []resBlock `json:"block"`
 	// 以下はComputedです
-	Token      string    `json:"token"`
-	ServerName string    `json:"server_name"`
-	AvatarURL  string    `json:"avatar_url"`
-	Role       []resRole `json:"role"`
-	Nickname   string    `json:"nickname"`
+	Token      string       `json:"token"`
+	ServerName string       `json:"server_name"`
+	AvatarURL  string       `json:"avatar_url"`
+	Role       []resRole    `json:"role"`
+	Channel    []resChannel `json:"channel"`
+	Nickname   string       `json:"nickname"`
+	Rule       struct {
+		URL struct {
+			IsRestrict     bool     `json:"is_restrict"`
+			IsYoutubeAllow bool     `json:"is_youtube_allow"`
+			IsTwitterAllow bool     `json:"is_twitter_allow"`
+			IsGIFAllow     bool     `json:"is_gif_allow"`
+			AllowRoleID    []string `json:"allow_role_id"`
+			AllowChannelID []string `json:"allow_channel_id"`
+			AlertChannelID string   `json:"alert_channel_id"`
+		} `json:"url"`
+	} `json:"rule"`
 }
 
 // ブロックのレスポンスです
@@ -45,6 +57,12 @@ type resBlock struct {
 
 // ロールのレスポンスです
 type resRole struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// チャンネルのレスポンスです
+type resChannel struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
@@ -173,6 +191,13 @@ func getServer(c *gin.Context) {
 		return
 	}
 
+	allChannels, err := guild.GetAllTextChannels(session, apiRes.ID)
+	if err != nil {
+		message_send.SendErrMsg(session, errors.NewError("全てのチャンネルを取得できません", err), guildName)
+		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
+		return
+	}
+
 	m, err := session.GuildMember(id, os.Getenv("DISCORD_APPLICATION_ID"))
 	if err != nil {
 		message_send.SendErrMsg(session, errors.NewError("botのMember情報を取得できません", err), guildName)
@@ -188,7 +213,15 @@ func getServer(c *gin.Context) {
 	res.ServerName = guildName
 	res.AvatarURL = avatarURL
 	res.Role = []resRole{}
+	res.Channel = []resChannel{}
 	res.Nickname = m.Nick
+	res.Rule.URL.IsRestrict = apiRes.Rule.URL.IsRestrict
+	res.Rule.URL.IsYoutubeAllow = apiRes.Rule.URL.IsYoutubeAllow
+	res.Rule.URL.IsTwitterAllow = apiRes.Rule.URL.IsTwitterAllow
+	res.Rule.URL.IsGIFAllow = apiRes.Rule.URL.IsGIFAllow
+	res.Rule.URL.AllowRoleID = apiRes.Rule.URL.AllowRoleID
+	res.Rule.URL.AllowChannelID = apiRes.Rule.URL.AllowChannelID
+	res.Rule.URL.AlertChannelID = apiRes.Rule.URL.AlertChannelID
 
 	// レスポンスにブロックを追加します
 	for _, v := range apiRes.Block {
@@ -211,6 +244,16 @@ func getServer(c *gin.Context) {
 		}
 
 		res.Role = append(res.Role, tmpRole)
+	}
+
+	// レスポンスにチャンネルを追加します
+	for channelID, channelName := range allChannels {
+		tmpChannel := resChannel{
+			ID:   channelID,
+			Name: channelName,
+		}
+
+		res.Channel = append(res.Channel, tmpChannel)
 	}
 
 	c.JSON(http.StatusOK, res)

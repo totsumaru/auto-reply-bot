@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
-	"strings"
 )
 
 const (
-	URLPrefixHTTP = "http://"
-	YoutubeURL    = "https://youtube.com/"
-	TwitterURL    = "https://twitter.com/"
-	GIFURL        = "https://tenor.com/"
+	URLPrefixHTTP  = "http://"
+	URLPrefixHTTPS = "https://"
+	YoutubeURL     = "https://youtube.com/"
+	TwitterURL     = "https://twitter.com/"
+	GIFURL         = "https://tenor.com/"
 
 	AllowRoleMAX    = 5
 	AllowChannelMAX = 10
@@ -54,60 +54,6 @@ func NewURL(
 	}
 
 	return u, nil
-}
-
-// メッセージが許可されているか検証します
-func (u URL) IsAllowedURLMessage(
-	authorRoleID model.RoleID,
-	channelID model.ChannelID,
-	msg string,
-) bool {
-	// URL制限していない場合はここで終了
-	if !u.isRestrict {
-		return true
-	}
-
-	// httpが何個含まれているか確認(含まれていなければここで終了)
-	httpCount := strings.Count(msg, URLPrefixHTTP)
-	if httpCount == 0 {
-		return true
-	}
-
-	// 許可されているチャンネルの場合はここで終了
-	for _, v := range u.allowChannelID {
-		if v.Equal(channelID) {
-			return true
-		}
-	}
-
-	// 許可されているロールの場合はここで終了
-	for _, v := range u.allowRoleID {
-		if v.Equal(authorRoleID) {
-			return true
-		}
-	}
-
-	allowURLCount := 0
-
-	// YouTubeのURLの個数をカウントに追加
-	if u.isYoutubeAllow {
-		allowURLCount += strings.Count(msg, YoutubeURL)
-	}
-	// TwitterのURLの個数をカウントに追加
-	if u.isTwitterAllow {
-		allowURLCount += strings.Count(msg, TwitterURL)
-	}
-	// GIFのURLの個数をカウントに追加
-	if u.isGIFAllow {
-		allowURLCount += strings.Count(msg, GIFURL)
-	}
-
-	// httpの個数と、許可されたURLの個数が一致した場合はOK
-	if httpCount == allowURLCount {
-		return true
-	}
-
-	return false
 }
 
 // URL制限をするかを取得します
