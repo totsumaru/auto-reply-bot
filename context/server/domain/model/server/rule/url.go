@@ -9,9 +9,15 @@ import (
 const (
 	URLPrefixHTTP  = "http://"
 	URLPrefixHTTPS = "https://"
-	YoutubeURL     = "https://youtube.com/"
-	TwitterURL     = "https://twitter.com/"
-	GIFURL         = "https://tenor.com/"
+
+	YoutubeURL    = "https://youtube.com"
+	YoutubeWWWURL = "https://www.youtube.com"
+
+	TwitterURL    = "https://twitter.com"
+	TwitterWWWURL = "https://www.twitter.com"
+
+	GIFURL    = "https://tenor.com"
+	GIFWWWURL = "https://www.tenor.com"
 
 	AllowRoleMAX    = 5
 	AllowChannelMAX = 10
@@ -105,6 +111,28 @@ func (u URL) validate() error {
 	// チャンネルの数を検証します
 	if len(u.allowChannelID) > AllowChannelMAX {
 		return errors.NewError("チャンネルの数が上限を超えています")
+	}
+
+	// 許可するロールIDで重複していないかを検証します
+	//
+	// 重複確認のmapのため、valueのboolは意味を持ちません。
+	tmpRoleID := map[string]bool{}
+	for _, roleID := range u.allowRoleID {
+		if _, ok := tmpRoleID[roleID.String()]; ok {
+			return errors.NewError("許可するロールIDが重複しています")
+		}
+		tmpRoleID[roleID.String()] = true
+	}
+
+	// 許可するチャンネルIDで重複していないかを検証します
+	//
+	// 重複確認のmapのため、valueのboolは意味を持ちません。
+	tmpChannelID := map[string]bool{}
+	for _, channelID := range u.allowChannelID {
+		if _, ok := tmpChannelID[channelID.String()]; ok {
+			return errors.NewError("許可するチャンネルIDが重複しています")
+		}
+		tmpChannelID[channelID.String()] = true
 	}
 
 	return nil

@@ -50,7 +50,9 @@ func GetGuildOwnerID(s *discordgo.Session, guildID string) (string, error) {
 // 全てのロールを取得します
 //
 // ロールID:ロール名 のmapを返します。
-func GetAllRoles(s *discordgo.Session, guildID string) (map[string]string, error) {
+//
+// @everyoneは除外します。
+func GetAllRolesWithoutEveryone(s *discordgo.Session, guildID string) (map[string]string, error) {
 	res := map[string]string{}
 
 	guild, err := s.Guild(guildID)
@@ -63,7 +65,9 @@ func GetAllRoles(s *discordgo.Session, guildID string) (map[string]string, error
 			return res, errors.NewError("ロールが重複しています")
 		}
 
-		res[role.ID] = role.Name
+		if role.ID != guildID {
+			res[role.ID] = role.Name
+		}
 	}
 
 	return res, nil

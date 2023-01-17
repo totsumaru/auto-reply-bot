@@ -22,12 +22,16 @@ const InvalidURLReplyTmpl = `
 
 // アラートチャンネルに送信するメッセージです
 const AlertChannelMessageTmpl = `
-以下の内容で不正なURLが送信されたので、botが削除しました。
----
-[チャンネル]
+許可されていないURLを含んでいたため、
+以下のメッセージをbotが削除しました。
+
+■チャンネル
 <#%s>
----
-[送信された内容(URL注意)]
+
+■送信したユーザー
+<@%s>
+
+■送信された内容(URL注意)
 %s
 `
 
@@ -101,8 +105,8 @@ func URL(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if alertCh != "none" {
 				req := message_send.SendMessageEmbedReq{
 					ChannelID: alertCh,
-					Title:     "[ALERT]許可されていないURLが送信されました",
-					Content:   fmt.Sprintf(AlertChannelMessageTmpl, m.ChannelID, content),
+					Title:     "許可されていないURLが送信されました",
+					Content:   fmt.Sprintf(AlertChannelMessageTmpl, m.ChannelID, m.Author.ID, content),
 					Color:     conf.ColorRed,
 				}
 				if err = message_send.SendMessageEmbed(s, req); err != nil {
@@ -160,14 +164,17 @@ func isAllowedURLMessage(
 	// YouTubeのURLの個数をカウントに追加
 	if urlRule.IsYoutubeAllow {
 		allowURLCount += strings.Count(msg, rule.YoutubeURL)
+		allowURLCount += strings.Count(msg, rule.YoutubeWWWURL)
 	}
 	// TwitterのURLの個数をカウントに追加
 	if urlRule.IsTwitterAllow {
 		allowURLCount += strings.Count(msg, rule.TwitterURL)
+		allowURLCount += strings.Count(msg, rule.TwitterWWWURL)
 	}
 	// GIFのURLの個数をカウントに追加
 	if urlRule.IsGIFAllow {
 		allowURLCount += strings.Count(msg, rule.GIFURL)
+		allowURLCount += strings.Count(msg, rule.GIFWWWURL)
 	}
 
 	// httpの個数と、許可されたURLの個数が一致した場合はOK

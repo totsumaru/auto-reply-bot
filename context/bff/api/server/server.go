@@ -184,7 +184,7 @@ func getServer(c *gin.Context) {
 		return
 	}
 
-	allRoles, err := guild.GetAllRoles(session, apiRes.ID)
+	allRoles, err := guild.GetAllRolesWithoutEveryone(session, apiRes.ID)
 	if err != nil {
 		message_send.SendErrMsg(session, errors.NewError("全てのロールを取得できません", err), guildName)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")

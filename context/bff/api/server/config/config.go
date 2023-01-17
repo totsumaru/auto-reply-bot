@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/check"
@@ -162,8 +161,6 @@ func postServerConfig(c *gin.Context) {
 			return errors.NewError("リクエストをJSONにバインドできません", err)
 		}
 
-		fmt.Printf("%#v", req.Rule.URL)
-
 		apiReqBlocks := make([]v1.BlockReq, 0)
 
 		for _, rb := range req.Block {
@@ -225,7 +222,7 @@ func postServerConfig(c *gin.Context) {
 		return
 	}
 
-	allRoles, err := guild.GetAllRoles(session, apiRes.ID)
+	allRoles, err := guild.GetAllRolesWithoutEveryone(session, apiRes.ID)
 	if err != nil {
 		message_send.SendErrMsg(session, errors.NewError("全てのロールを取得できません", err), guildName)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
