@@ -25,6 +25,8 @@ type URLRuleReq struct {
 	IsYoutubeAllow bool
 	IsTwitterAllow bool
 	IsGIFAllow     bool
+	IsOpenseaAllow bool
+	IsDiscordAllow bool
 	AllowRoleID    []string
 	AllowChannelID []string
 	AlertChannelID string

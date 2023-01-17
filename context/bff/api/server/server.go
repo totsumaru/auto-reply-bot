@@ -38,6 +38,8 @@ type Res struct {
 			IsYoutubeAllow bool     `json:"is_youtube_allow"`
 			IsTwitterAllow bool     `json:"is_twitter_allow"`
 			IsGIFAllow     bool     `json:"is_gif_allow"`
+			IsOpenSeaAllow bool     `json:"is_opensea_allow"`
+			IsDiscordAllow bool     `json:"is_discord_allow"`
 			AllowRoleID    []string `json:"allow_role_id"`
 			AllowChannelID []string `json:"allow_channel_id"`
 			AlertChannelID string   `json:"alert_channel_id"`
@@ -219,6 +221,8 @@ func getServer(c *gin.Context) {
 	res.Rule.URL.IsYoutubeAllow = apiRes.Rule.URL.IsYoutubeAllow
 	res.Rule.URL.IsTwitterAllow = apiRes.Rule.URL.IsTwitterAllow
 	res.Rule.URL.IsGIFAllow = apiRes.Rule.URL.IsGIFAllow
+	res.Rule.URL.IsOpenSeaAllow = apiRes.Rule.URL.IsOpenseaAllow
+	res.Rule.URL.IsDiscordAllow = apiRes.Rule.URL.IsDiscordAllow
 	res.Rule.URL.AllowRoleID = apiRes.Rule.URL.AllowRoleID
 	res.Rule.URL.AllowChannelID = apiRes.Rule.URL.AllowChannelID
 	res.Rule.URL.AlertChannelID = apiRes.Rule.URL.AlertChannelID

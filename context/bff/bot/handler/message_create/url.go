@@ -87,6 +87,12 @@ func URL(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if storeRes.Rule.URL.IsGIFAllow {
 				allowURLs = append(allowURLs, "GIF")
 			}
+			if storeRes.Rule.URL.IsOpenseaAllow {
+				allowURLs = append(allowURLs, "Opensea")
+			}
+			if storeRes.Rule.URL.IsDiscordAllow {
+				allowURLs = append(allowURLs, "Discord")
+			}
 
 			req := message_send.SendMessageEmbedReq{
 				ChannelID: m.ChannelID,
@@ -176,9 +182,20 @@ func isAllowedURLMessage(
 		allowURLCount += strings.Count(msg, rule.GIFURL)
 		allowURLCount += strings.Count(msg, rule.GIFWWWURL)
 	}
+	// OpenseaのURLの個数をカウントに追加
+	if urlRule.IsOpenseaAllow {
+		allowURLCount += strings.Count(msg, rule.OpenseaURL)
+		allowURLCount += strings.Count(msg, rule.OpenseaWWWURL)
+		allowURLCount += strings.Count(msg, rule.OpenseaTestnetURL)
+	}
+	// DiscordのURLの個数をカウントに追加
+	if urlRule.IsDiscordAllow {
+		allowURLCount += strings.Count(msg, rule.DiscordURL)
+		allowURLCount += strings.Count(msg, rule.DiscordWWWURL)
+	}
 
 	// httpの個数と、許可されたURLの個数が一致した場合はOK
-	if urlCount == allowURLCount {
+	if urlCount <= allowURLCount {
 		return true, nil
 	}
 
