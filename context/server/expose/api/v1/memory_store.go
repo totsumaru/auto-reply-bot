@@ -34,12 +34,12 @@ func InitStore(res []Res) {
 }
 
 // ストアの値を取得します
-func GetStoreRes(id string) (Res, error) {
-	if _, ok := store[id]; !ok {
-		return Res{}, errors.NewError(fmt.Sprintf("storeに値が存在しません[id: %s]", id))
+func GetStoreRes(serverID string) (Res, error) {
+	if _, ok := store[serverID]; !ok {
+		return Res{}, errors.NewError(fmt.Sprintf("storeに値が存在しません[id: %s]", serverID))
 	}
 
-	return store[id], nil
+	return store[serverID], nil
 }
 
 // ストアを更新します
@@ -54,16 +54,16 @@ func updateStore(res Res) error {
 }
 
 // ストアの値を削除します
-func removeStore(id string) error {
+func removeStore(serverID string) error {
 	// MutexのLockをかけます
 	mu.Lock()
 	defer mu.Unlock()
 
-	if _, ok := store[id]; !ok {
-		return errors.NewError(fmt.Sprintf("storeに値が存在しません[id: %s]", id))
+	if _, ok := store[serverID]; !ok {
+		return errors.NewError(fmt.Sprintf("storeに値が存在しません[id: %s]", serverID))
 	}
 
-	delete(store, id)
+	delete(store, serverID)
 
 	return nil
 }

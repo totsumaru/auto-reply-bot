@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )
@@ -9,7 +10,7 @@ import (
 //
 // IDを返します。
 func (a *App) CreateServer(serverID string) (string, error) {
-	i, err := server.NewID(serverID)
+	i, err := model.NewID(serverID)
 	if err != nil {
 		return "", errors.NewError("idを作成できません", err)
 	}

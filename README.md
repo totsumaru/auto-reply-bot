@@ -12,9 +12,9 @@
 
 ## botの導入URL
 
-[本番用のbotの導入はこちら](https://discord.com/api/oauth2/authorize?client_id=1056843645967413309&permissions=412317207552&scope=bot)
+[本番用のbotの導入はこちら](https://discord.com/api/oauth2/authorize?client_id=1056843645967413309&permissions=412317215744&scope=bot)
 
-[テスト用のbotの導入はこちら](https://discord.com/api/oauth2/authorize?client_id=1055348253614419989&permissions=412317207552&scope=bot)
+[テスト用のbotの導入はこちら](https://discord.com/api/oauth2/authorize?client_id=1055348253614419989&permissions=412317215744&scope=bot)
 
 ## 新規サーバーへの導入手順
 
@@ -44,10 +44,17 @@
 - Read Messages/View Channels
 - Send Messages
 - Send Messages in Threads
+- Manage Messages
 - Embed Links
 - Read Message History
 - Use External Emojis
 - Use External Stickers
+
+Permission
+
+```
+412317215744
+```
 
 ## API
 

@@ -50,7 +50,9 @@ func GetGuildOwnerID(s *discordgo.Session, guildID string) (string, error) {
 // 全てのロールを取得します
 //
 // ロールID:ロール名 のmapを返します。
-func GetAllRoles(s *discordgo.Session, guildID string) (map[string]string, error) {
+//
+// @everyoneは除外します。
+func GetAllRolesWithoutEveryone(s *discordgo.Session, guildID string) (map[string]string, error) {
 	res := map[string]string{}
 
 	guild, err := s.Guild(guildID)
@@ -63,7 +65,34 @@ func GetAllRoles(s *discordgo.Session, guildID string) (map[string]string, error
 			return res, errors.NewError("ロールが重複しています")
 		}
 
-		res[role.ID] = role.Name
+		if role.ID != guildID {
+			res[role.ID] = role.Name
+		}
+	}
+
+	return res, nil
+}
+
+// 全てのテキストチャンネルを取得します
+//
+// チャンネルID:チャンネル名 のmapを返します。
+func GetAllTextChannels(s *discordgo.Session, guildID string) (map[string]string, error) {
+	res := map[string]string{}
+
+	channels, err := s.GuildChannels(guildID)
+	if err != nil {
+		return res, errors.NewError("チャンネル一覧を取得できません", err)
+	}
+
+	for _, channel := range channels {
+		if _, ok := res[channel.ID]; ok {
+			return res, errors.NewError("チャンネルが重複しています")
+		}
+
+		// テキストチャンネルのみ追加します
+		if channel.Type == discordgo.ChannelTypeGuildText {
+			res[channel.ID] = channel.Name
+		}
 	}
 
 	return res, nil

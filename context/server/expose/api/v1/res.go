@@ -9,6 +9,17 @@ type Res struct {
 	ID          string
 	AdminRoleID string
 	Block       []BlockRes
+	Rule        struct {
+		URL struct {
+			IsRestrict     bool
+			IsYoutubeAllow bool
+			IsTwitterAllow bool
+			IsGIFAllow     bool
+			AllowRoleID    []string
+			AllowChannelID []string
+			AlertChannelID string
+		}
+	}
 }
 
 // ブロックのレスポンスです
@@ -52,6 +63,27 @@ func CreateRes(m map[string]interface{}) (Res, error) {
 	res.ID = seeker.Str(m, []string{"id", "value"})
 	res.AdminRoleID = seeker.Str(m, []string{"admin_role_id", "value"})
 	res.Block = blockRes
+
+	// URLルール
+	{
+		allowRoleID := make([]string, 0)
+		for _, v := range seeker.Slice(m, []string{"rule", "url", "allow_role_id"}) {
+			allowRoleID = append(allowRoleID, seeker.Str(v, []string{"value"}))
+		}
+
+		allowChannelID := make([]string, 0)
+		for _, v := range seeker.Slice(m, []string{"rule", "url", "allow_channel_id"}) {
+			allowChannelID = append(allowChannelID, seeker.Str(v, []string{"value"}))
+		}
+
+		res.Rule.URL.IsRestrict = seeker.Bool(m, []string{"rule", "url", "is_restrict"})
+		res.Rule.URL.IsYoutubeAllow = seeker.Bool(m, []string{"rule", "url", "is_youtube_allow"})
+		res.Rule.URL.IsTwitterAllow = seeker.Bool(m, []string{"rule", "url", "is_twitter_allow"})
+		res.Rule.URL.IsGIFAllow = seeker.Bool(m, []string{"rule", "url", "is_gif_allow"})
+		res.Rule.URL.AllowRoleID = allowRoleID
+		res.Rule.URL.AllowChannelID = allowChannelID
+		res.Rule.URL.AlertChannelID = seeker.Str(m, []string{"rule", "url", "alert_channel_id", "value"})
+	}
 
 	return res, nil
 }

@@ -30,6 +30,17 @@ type ReqConfig struct {
 		IsRandom       bool     `json:"is_random"`
 		IsEmbed        bool     `json:"is_embed"`
 	} `json:"block"`
+	Rule struct {
+		URL struct {
+			IsRestrict     bool     `json:"is_restrict"`
+			IsYoutubeAllow bool     `json:"is_youtube_allow"`
+			IsTwitterAllow bool     `json:"is_twitter_allow"`
+			IsGIFAllow     bool     `json:"is_gif_allow"`
+			AllowRoleID    []string `json:"allow_role_id"`
+			AllowChannelID []string `json:"allow_channel_id"`
+			AlertChannelID string   `json:"alert_channel_id"`
+		} `json:"url"`
+	} `json:"rule"`
 }
 
 // レスポンスです
@@ -38,9 +49,21 @@ type Res struct {
 	AdminRoleID string     `json:"admin_role_id"`
 	Block       []resBlock `json:"block"`
 	// 以下はComputedです
-	ServerName string    `json:"server_name"`
-	AvatarURL  string    `json:"avatar_url"`
-	Role       []resRole `json:"role"`
+	ServerName string       `json:"server_name"`
+	AvatarURL  string       `json:"avatar_url"`
+	Role       []resRole    `json:"role"`
+	Channel    []resChannel `json:"channel"`
+	Rule       struct {
+		URL struct {
+			IsRestrict     bool     `json:"is_restrict"`
+			IsYoutubeAllow bool     `json:"is_youtube_allow"`
+			IsTwitterAllow bool     `json:"is_twitter_allow"`
+			IsGIFAllow     bool     `json:"is_gif_allow"`
+			AllowRoleID    []string `json:"allow_role_id"`
+			AllowChannelID []string `json:"allow_channel_id"`
+			AlertChannelID string   `json:"alert_channel_id"`
+		} `json:"url"`
+	} `json:"rule"`
 }
 
 // ブロックのレスポンスです
@@ -55,6 +78,12 @@ type resBlock struct {
 
 // ロールのレスポンスです
 type resRole struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// チャンネルのレスポンスです
+type resChannel struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
@@ -146,7 +175,17 @@ func postServerConfig(c *gin.Context) {
 			apiReqBlocks = append(apiReqBlocks, apiBlockReq)
 		}
 
-		apiRes, err = v1.UpdateConfig(session, ctx, id, req.AdminRoleID, apiReqBlocks)
+		apiRuleReq := v1.URLRuleReq{
+			IsRestrict:     req.Rule.URL.IsRestrict,
+			IsYoutubeAllow: req.Rule.URL.IsYoutubeAllow,
+			IsTwitterAllow: req.Rule.URL.IsTwitterAllow,
+			IsGIFAllow:     req.Rule.URL.IsGIFAllow,
+			AllowRoleID:    req.Rule.URL.AllowRoleID,
+			AllowChannelID: req.Rule.URL.AllowChannelID,
+			AlertChannelID: req.Rule.URL.AlertChannelID,
+		}
+
+		apiRes, err = v1.UpdateConfig(session, ctx, id, req.AdminRoleID, apiReqBlocks, apiRuleReq)
 		if err != nil {
 			return errors.NewError("設定を更新できません", err)
 		}
@@ -183,9 +222,16 @@ func postServerConfig(c *gin.Context) {
 		return
 	}
 
-	allRoles, err := guild.GetAllRoles(session, apiRes.ID)
+	allRoles, err := guild.GetAllRolesWithoutEveryone(session, apiRes.ID)
 	if err != nil {
 		message_send.SendErrMsg(session, errors.NewError("全てのロールを取得できません", err), guildName)
+		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
+		return
+	}
+
+	allChannels, err := guild.GetAllTextChannels(session, apiRes.ID)
+	if err != nil {
+		message_send.SendErrMsg(session, errors.NewError("全てのチャンネルを取得できません", err), guildName)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
@@ -197,6 +243,14 @@ func postServerConfig(c *gin.Context) {
 	res.ServerName = guildName
 	res.AvatarURL = avatarURL
 	res.Role = []resRole{}
+	res.Channel = []resChannel{}
+	res.Rule.URL.IsRestrict = apiRes.Rule.URL.IsRestrict
+	res.Rule.URL.IsYoutubeAllow = apiRes.Rule.URL.IsYoutubeAllow
+	res.Rule.URL.IsTwitterAllow = apiRes.Rule.URL.IsTwitterAllow
+	res.Rule.URL.IsGIFAllow = apiRes.Rule.URL.IsGIFAllow
+	res.Rule.URL.AllowRoleID = apiRes.Rule.URL.AllowRoleID
+	res.Rule.URL.AllowChannelID = apiRes.Rule.URL.AllowChannelID
+	res.Rule.URL.AlertChannelID = apiRes.Rule.URL.AlertChannelID
 
 	for _, v := range apiRes.Block {
 		blockRes := resBlock{}
@@ -218,6 +272,16 @@ func postServerConfig(c *gin.Context) {
 		}
 
 		res.Role = append(res.Role, tmpRole)
+	}
+
+	// レスポンスにチャンネルを追加します
+	for channelID, channelName := range allChannels {
+		tmpChannel := resChannel{
+			ID:   channelID,
+			Name: channelName,
+		}
+
+		res.Channel = append(res.Channel, tmpChannel)
 	}
 
 	c.JSON(http.StatusOK, res)
