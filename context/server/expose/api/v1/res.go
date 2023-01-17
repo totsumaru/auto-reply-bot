@@ -15,6 +15,8 @@ type Res struct {
 			IsYoutubeAllow bool
 			IsTwitterAllow bool
 			IsGIFAllow     bool
+			IsOpenseaAllow bool
+			IsDiscordAllow bool
 			AllowRoleID    []string
 			AllowChannelID []string
 			AlertChannelID string
@@ -80,6 +82,8 @@ func CreateRes(m map[string]interface{}) (Res, error) {
 		res.Rule.URL.IsYoutubeAllow = seeker.Bool(m, []string{"rule", "url", "is_youtube_allow"})
 		res.Rule.URL.IsTwitterAllow = seeker.Bool(m, []string{"rule", "url", "is_twitter_allow"})
 		res.Rule.URL.IsGIFAllow = seeker.Bool(m, []string{"rule", "url", "is_gif_allow"})
+		res.Rule.URL.IsOpenseaAllow = seeker.Bool(m, []string{"rule", "url", "is_opensea_allow"})
+		res.Rule.URL.IsDiscordAllow = seeker.Bool(m, []string{"rule", "url", "is_discord_allow"})
 		res.Rule.URL.AllowRoleID = allowRoleID
 		res.Rule.URL.AllowChannelID = allowChannelID
 		res.Rule.URL.AlertChannelID = seeker.Str(m, []string{"rule", "url", "alert_channel_id", "value"})

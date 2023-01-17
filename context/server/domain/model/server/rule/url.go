@@ -19,6 +19,13 @@ const (
 	GIFURL    = "https://tenor.com"
 	GIFWWWURL = "https://www.tenor.com"
 
+	OpenseaURL        = "https://opensea.io"
+	OpenseaWWWURL     = "https://opensea.io"
+	OpenseaTestnetURL = "https://testnets.opensea.io"
+
+	DiscordURL    = "https://discord.com"
+	DiscordWWWURL = "https://www.discord.com"
+
 	AllowRoleMAX    = 5
 	AllowChannelMAX = 10
 )
@@ -31,6 +38,8 @@ type URL struct {
 	isYoutubeAllow bool              // Youtubeを許可するか
 	isTwitterAllow bool              // Twitterを許可するか
 	isGIFAllow     bool              // GIFを許可するか
+	isOpenseaAllow bool              // OpenSeaを許可するか
+	isDiscordAllow bool              // Discordを許可するか
 	allowRoleID    []model.RoleID    // URL制限を受けないロールID
 	allowChannelID []model.ChannelID // URL制限を受けないチャンネルID
 	alertChannelID model.ChannelID   // 禁止されたURLのメッセージが送信された時にログを送信するチャンネル
@@ -42,6 +51,8 @@ func NewURL(
 	isYoutubeAllow bool,
 	isTwitterAllow bool,
 	isGIFAllow bool,
+	isOpenseaAllow bool,
+	isDiscordAllow bool,
 	allowRoleID []model.RoleID,
 	allowChannelID []model.ChannelID,
 	alertChannelID model.ChannelID,
@@ -51,6 +62,8 @@ func NewURL(
 	u.isYoutubeAllow = isYoutubeAllow
 	u.isTwitterAllow = isTwitterAllow
 	u.isGIFAllow = isGIFAllow
+	u.isOpenseaAllow = isOpenseaAllow
+	u.isDiscordAllow = isDiscordAllow
 	u.allowRoleID = allowRoleID
 	u.allowChannelID = allowChannelID
 	u.alertChannelID = alertChannelID
@@ -80,6 +93,16 @@ func (u URL) IsTwitterAllow() bool {
 // GIFを許可するかを取得します
 func (u URL) IsGIFAllow() bool {
 	return u.isGIFAllow
+}
+
+// Openseaを許可するかを取得します
+func (u URL) IsOpenseaAllow() bool {
+	return u.isOpenseaAllow
+}
+
+// Discordを許可するかを取得します
+func (u URL) IsDiscordAllow() bool {
+	return u.isDiscordAllow
 }
 
 // URL制限を受けないロールを取得します
@@ -149,6 +172,8 @@ func (u URL) MarshalJSON() ([]byte, error) {
 		IsYoutubeAllow bool              `json:"is_youtube_allow"`
 		IsTwitterAllow bool              `json:"is_twitter_allow"`
 		IsGIFAllow     bool              `json:"is_gif_allow"`
+		IsOpenseaAllow bool              `json:"is_opensea_allow"`
+		IsDiscordAllow bool              `json:"is_discord_allow"`
 		AllowRoleID    []model.RoleID    `json:"allow_role_id"`
 		AllowChannelID []model.ChannelID `json:"allow_channel_id"`
 		AlertChannelID model.ChannelID   `json:"alert_channel_id"`
@@ -157,6 +182,8 @@ func (u URL) MarshalJSON() ([]byte, error) {
 		IsYoutubeAllow: u.isYoutubeAllow,
 		IsTwitterAllow: u.isTwitterAllow,
 		IsGIFAllow:     u.isGIFAllow,
+		IsOpenseaAllow: u.isOpenseaAllow,
+		IsDiscordAllow: u.isDiscordAllow,
 		AllowRoleID:    u.allowRoleID,
 		AllowChannelID: u.allowChannelID,
 		AlertChannelID: u.alertChannelID,
@@ -177,6 +204,8 @@ func (u *URL) UnmarshalJSON(b []byte) error {
 		IsYoutubeAllow bool              `json:"is_youtube_allow"`
 		IsTwitterAllow bool              `json:"is_twitter_allow"`
 		IsGIFAllow     bool              `json:"is_gif_allow"`
+		IsOpenseaAllow bool              `json:"is_opensea_allow"`
+		IsDiscordAllow bool              `json:"is_discord_allow"`
 		AllowRoleID    []model.RoleID    `json:"allow_role_id"`
 		AllowChannelID []model.ChannelID `json:"allow_channel_id"`
 		AlertChannelID model.ChannelID   `json:"alert_channel_id"`
@@ -190,6 +219,8 @@ func (u *URL) UnmarshalJSON(b []byte) error {
 	u.isYoutubeAllow = j.IsYoutubeAllow
 	u.isTwitterAllow = j.IsTwitterAllow
 	u.isGIFAllow = j.IsGIFAllow
+	u.isOpenseaAllow = j.IsOpenseaAllow
+	u.isDiscordAllow = j.IsDiscordAllow
 	u.allowRoleID = j.AllowRoleID
 	u.allowChannelID = j.AllowChannelID
 	u.alertChannelID = j.AlertChannelID
