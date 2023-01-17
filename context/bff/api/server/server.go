@@ -122,13 +122,6 @@ func getServer(c *gin.Context) {
 			return
 		}
 
-		ok, err := check.HasRole(session, id, userID, tmpRes.AdminRoleID)
-		if err != nil {
-			message_send.SendErrMsg(session, errors.NewError("ロールの所有確認に失敗しました", err), guildName)
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
-
 		guildOwnerID, err := guild.GetGuildOwnerID(session, id)
 		if err != nil {
 			message_send.SendErrMsg(session, errors.NewError("オーナーIDを取得できません", err), guildName)
@@ -136,10 +129,19 @@ func getServer(c *gin.Context) {
 			return
 		}
 
-		if !(ok || userID == guildOwnerID || userID == conf.TotsumaruDiscordID) {
-			message_send.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"), guildName)
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
+		if !(userID == conf.TotsumaruDiscordID || userID == guildOwnerID) {
+			ok, err := check.HasRole(session, id, userID, tmpRes.AdminRoleID)
+			if err != nil {
+				message_send.SendErrMsg(session, errors.NewError("ロールの所有確認に失敗しました", err), guildName)
+				c.JSON(http.StatusUnauthorized, "認証されていません")
+				return
+			}
+
+			if !ok {
+				message_send.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"), guildName)
+				c.JSON(http.StatusUnauthorized, "認証されていません")
+				return
+			}
 		}
 	}
 
