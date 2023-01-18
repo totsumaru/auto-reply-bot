@@ -138,6 +138,7 @@ func getServer(c *gin.Context) {
 			}
 
 			if !ok {
+				message_send.SendErrMsg(session, errors.NewError("認証に失敗しました", err), guildName)
 				c.JSON(http.StatusUnauthorized, "認証されていません")
 				return
 			}
