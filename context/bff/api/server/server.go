@@ -111,7 +111,8 @@ func getServer(c *gin.Context) {
 		token, err = convert.CodeToToken(code)
 		if err != nil {
 			// codeの不正に関してはエラー通知しません
-			c.JSON(http.StatusUnauthorized, "認証されていません")
+			message_send.SendErrMsg(session, errors.NewError("トークンをDiscordIDに変換できません", err), guildName)
+			c.JSON(http.StatusUnauthorized, "codeが認証されていません")
 			return
 		}
 
