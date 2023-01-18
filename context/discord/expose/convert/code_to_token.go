@@ -19,7 +19,7 @@ func CodeToToken(code string) (string, error) {
 	values.Add("client_secret", os.Getenv("DISCORD_CLIENT_SECRET"))
 	values.Add("grant_type", "authorization_code")
 	values.Add("code", code)
-	values.Add("redirect_uri", shared.RedirectURL)
+	values.Add("redirect_uri", shared.CreateRedirectURL())
 
 	req, err := http.NewRequest(
 		http.MethodPost,

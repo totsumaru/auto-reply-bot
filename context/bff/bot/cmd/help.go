@@ -97,7 +97,7 @@ var CmdHelp = cmd.CMD{
 		discordLoginURL := fmt.Sprintf(
 			DiscordLoginURLTmpl,
 			os.Getenv("DISCORD_CLIENT_ID"),
-			url.QueryEscape(shared.RedirectURL),
+			url.QueryEscape(shared.CreateRedirectURL()),
 			m.GuildID,
 		)
 
