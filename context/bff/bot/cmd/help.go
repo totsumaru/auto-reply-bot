@@ -18,7 +18,7 @@ import (
 // DiscordログインのURLテンプレートです
 //
 // fmt.Sprintf(DiscordLoginURLTmpl,{ENVのDISCORD_CLIENT_ID},{エンコードしたリダイレクトURL})
-const DiscordLoginURLTmpl = "https://discord.com/api/oauth2/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=identify"
+const DiscordLoginURLTmpl = "https://discord.com/api/oauth2/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=identify&state=%s"
 
 const msg = `
 決められた条件に一致するコメントが送信された場合、
@@ -94,12 +94,11 @@ var CmdHelp = cmd.CMD{
 			}
 		}
 
-		redirectURL := shared.CreateDiscordLoginRedirectURL(m.GuildID)
-
 		discordLoginURL := fmt.Sprintf(
 			DiscordLoginURLTmpl,
 			os.Getenv("DISCORD_CLIENT_ID"),
-			url.QueryEscape(redirectURL),
+			url.QueryEscape(shared.RedirectURL),
+			m.GuildID,
 		)
 
 		if err := message_send.SendEmbedEphemeralReplyWithURLBtn(

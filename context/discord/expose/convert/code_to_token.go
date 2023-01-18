@@ -13,15 +13,13 @@ import (
 )
 
 // codeからTokenを取得します
-func CodeToToken(code, serverID string) (string, error) {
-	redirectURI := shared.CreateDiscordLoginRedirectURL(serverID)
-
+func CodeToToken(code string) (string, error) {
 	values := url.Values{}
 	values.Set("client_id", os.Getenv("DISCORD_CLIENT_ID"))
 	values.Add("client_secret", os.Getenv("DISCORD_CLIENT_SECRET"))
 	values.Add("grant_type", "authorization_code")
 	values.Add("code", code)
-	values.Add("redirect_uri", redirectURI)
+	values.Add("redirect_uri", shared.RedirectURL)
 
 	req, err := http.NewRequest(
 		http.MethodPost,

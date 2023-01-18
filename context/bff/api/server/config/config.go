@@ -150,7 +150,6 @@ func postServerConfig(c *gin.Context) {
 			}
 
 			if !ok {
-				message_send.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"), guildName)
 				c.JSON(http.StatusUnauthorized, "認証されていません")
 				return
 			}

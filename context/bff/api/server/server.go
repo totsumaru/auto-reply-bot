@@ -108,7 +108,7 @@ func getServer(c *gin.Context) {
 			return
 		}
 
-		token, err = convert.CodeToToken(code, id)
+		token, err = convert.CodeToToken(code)
 		if err != nil {
 			// codeの不正に関してはエラー通知しません
 			c.JSON(http.StatusUnauthorized, "認証されていません")
@@ -138,7 +138,6 @@ func getServer(c *gin.Context) {
 			}
 
 			if !ok {
-				message_send.SendErrMsg(session, errors.NewError("管理者ロールを持っていません"), guildName)
 				c.JSON(http.StatusUnauthorized, "認証されていません")
 				return
 			}
