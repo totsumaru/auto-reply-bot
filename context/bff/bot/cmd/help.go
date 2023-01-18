@@ -27,15 +27,8 @@ const msg = `
 ■ コマンド
 ・/help（管理者のみ実行可能）
 
-■ その他機能
-__1. 各地の天気を取得__
-以下3つのキーワードを含む場合、botが天気情報を返します。
-・botへのメンション
-・都道府県名（または地域名）
-・"天気"というワード
-（例）@Comment-bot 東京都の天気
-
 ■ 各種URL
+・[使い方などはこちら](https://daffy-hamburger-7f6.notion.site/bot-d7292773a40e405eab3fc8310a83ddd7)
 ・[管理者に問い合わせ(Twitter)](https://twitter.com/totsumaru_dot)
 
 ■ お知らせ

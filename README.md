@@ -2,6 +2,10 @@
 
 指定した文字列に反応して、自動でメッセージを返信するbotです。
 
+## ドキュメントURL(Notion)
+
+[https://daffy-hamburger-7f6.notion.site/bot-d7292773a40e405eab3fc8310a83ddd7](https://daffy-hamburger-7f6.notion.site/bot-d7292773a40e405eab3fc8310a83ddd7)
+
 ## 用語について
 
 | 用語    | 説明                   | 補足  | 
