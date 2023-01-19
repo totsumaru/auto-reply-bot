@@ -10,8 +10,9 @@ const (
 	URLPrefixHTTP  = "http://"
 	URLPrefixHTTPS = "https://"
 
-	YoutubeURL    = "https://youtube.com"
-	YoutubeWWWURL = "https://www.youtube.com"
+	YoutubeURL      = "https://youtube.com"
+	YoutubeShareURL = "https://youtu.be"
+	YoutubeWWWURL   = "https://www.youtube.com"
 
 	TwitterURL    = "https://twitter.com"
 	TwitterWWWURL = "https://www.twitter.com"

@@ -170,6 +170,7 @@ func isAllowedURLMessage(
 	// YouTubeのURLの個数をカウントに追加
 	if urlRule.IsYoutubeAllow {
 		allowURLCount += strings.Count(msg, rule.YoutubeURL)
+		allowURLCount += strings.Count(msg, rule.YoutubeShareURL)
 		allowURLCount += strings.Count(msg, rule.YoutubeWWWURL)
 	}
 	// TwitterのURLの個数をカウントに追加
