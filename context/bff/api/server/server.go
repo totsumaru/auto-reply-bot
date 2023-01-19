@@ -42,7 +42,6 @@ type Res struct {
 			IsDiscordAllow bool     `json:"is_discord_allow"`
 			AllowRoleID    []string `json:"allow_role_id"`
 			AllowChannelID []string `json:"allow_channel_id"`
-			AlertChannelID string   `json:"alert_channel_id"`
 		} `json:"url"`
 	} `json:"rule"`
 }
@@ -226,7 +225,6 @@ func getServer(c *gin.Context) {
 	res.Rule.URL.IsDiscordAllow = apiRes.Rule.URL.IsDiscordAllow
 	res.Rule.URL.AllowRoleID = apiRes.Rule.URL.AllowRoleID
 	res.Rule.URL.AllowChannelID = apiRes.Rule.URL.AllowChannelID
-	res.Rule.URL.AlertChannelID = apiRes.Rule.URL.AlertChannelID
 
 	// レスポンスにブロックを追加します
 	for _, v := range apiRes.Block {

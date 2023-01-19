@@ -41,7 +41,6 @@ func TestUpdateConfig(t *testing.T) {
 			IsGIFAllow:     true,
 			AllowRoleID:    []string{"r1", "r2"},
 			AllowChannelID: []string{"c1", "c2"},
-			AlertChannelID: "a1",
 		}
 
 		res, err := v1.UpdateConfig(
@@ -95,9 +94,6 @@ func TestUpdateConfig(t *testing.T) {
 			t.Fatal("期待した値と一致しません")
 		}
 		if !reflect.DeepEqual(res.Rule.URL.AllowChannelID, urlRuleReq.AllowChannelID) {
-			t.Fatal("期待した値と一致しません")
-		}
-		if res.Rule.URL.AlertChannelID != urlRuleReq.AlertChannelID {
 			t.Fatal("期待した値と一致しません")
 		}
 	})

@@ -29,7 +29,6 @@ type URLRuleReq struct {
 	IsDiscordAllow bool
 	AllowRoleID    []string
 	AllowChannelID []string
-	AlertChannelID string
 }
 
 // 設定を更新します
