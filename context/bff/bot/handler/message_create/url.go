@@ -16,23 +16,12 @@ import (
 
 // 不正URLが送信された時の削除後のメッセージです
 const InvalidURLReplyTmpl = `
-許可されていないURLが投稿されたので、メッセージを削除しました。
-許可されているURL: %s
-`
-
-// アラートチャンネルに送信するメッセージです
-const AlertChannelMessageTmpl = `
-許可されていないURLを含んでいたため、
-以下のメッセージをbotが削除しました。
-
-■チャンネル
-<#%s>
-
-■送信したユーザー
-<@%s>
-
-■送信された内容(URL注意)
+許可の無いURLが送信されたため、元メッセージを削除し、全てのURLを無効にして再投稿しています。
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 %s
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+許可されているURL: %s
+送信者: <@%s>
 `
 
 // URL制限について確認します
@@ -52,8 +41,6 @@ func URL(s *discordgo.Session, m *discordgo.MessageCreate) {
 		message_send.SendErrMsg(s, errors.NewError("ギルド名を取得できません", err), "")
 		return
 	}
-
-	content := m.Content
 
 	storeRes, err := v1.GetStoreRes(m.GuildID)
 	if err != nil {
@@ -94,30 +81,20 @@ func URL(s *discordgo.Session, m *discordgo.MessageCreate) {
 				allowURLs = append(allowURLs, "Discord")
 			}
 
+			fixedContent := strings.Replace(m.Content, "http", "h ttp", -1)
+
 			req := message_send.SendMessageEmbedReq{
 				ChannelID: m.ChannelID,
-				Title:     "許可されていないURLです",
-				Content:   fmt.Sprintf(InvalidURLReplyTmpl, allowURLs),
-				Color:     conf.ColorBlack,
+				Content: fmt.Sprintf(
+					InvalidURLReplyTmpl,
+					fixedContent,
+					allowURLs,
+					m.Author.ID,
+				),
+				Color: conf.ColorBlack,
 			}
 			if err = message_send.SendMessageEmbed(s, req); err != nil {
 				message_send.SendErrMsg(s, errors.NewError("埋め込みメッセージを送信できません", err), guildName)
-			}
-		}
-
-		// アラートチャンネルに詳細を送信します
-		{
-			alertCh := storeRes.Rule.URL.AlertChannelID
-			if alertCh != "none" {
-				req := message_send.SendMessageEmbedReq{
-					ChannelID: alertCh,
-					Title:     "許可されていないURLが送信されました",
-					Content:   fmt.Sprintf(AlertChannelMessageTmpl, m.ChannelID, m.Author.ID, content),
-					Color:     conf.ColorRed,
-				}
-				if err = message_send.SendMessageEmbed(s, req); err != nil {
-					message_send.SendErrMsg(s, errors.NewError("埋め込みメッセージを送信できません", err), guildName)
-				}
 			}
 		}
 	}
