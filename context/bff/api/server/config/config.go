@@ -40,7 +40,6 @@ type ReqConfig struct {
 			IsDiscordAllow bool     `json:"is_discord_allow"`
 			AllowRoleID    []string `json:"allow_role_id"`
 			AllowChannelID []string `json:"allow_channel_id"`
-			AlertChannelID string   `json:"alert_channel_id"`
 		} `json:"url"`
 	} `json:"rule"`
 }
@@ -65,7 +64,6 @@ type Res struct {
 			IsDiscordAllow bool     `json:"is_discord_allow"`
 			AllowRoleID    []string `json:"allow_role_id"`
 			AllowChannelID []string `json:"allow_channel_id"`
-			AlertChannelID string   `json:"alert_channel_id"`
 		} `json:"url"`
 	} `json:"rule"`
 }
@@ -189,7 +187,6 @@ func postServerConfig(c *gin.Context) {
 			IsDiscordAllow: req.Rule.URL.IsDiscordAllow,
 			AllowRoleID:    req.Rule.URL.AllowRoleID,
 			AllowChannelID: req.Rule.URL.AllowChannelID,
-			AlertChannelID: req.Rule.URL.AlertChannelID,
 		}
 
 		apiRes, err = v1.UpdateConfig(session, ctx, id, req.AdminRoleID, apiReqBlocks, apiRuleReq)
@@ -259,7 +256,6 @@ func postServerConfig(c *gin.Context) {
 	res.Rule.URL.IsDiscordAllow = apiRes.Rule.URL.IsDiscordAllow
 	res.Rule.URL.AllowRoleID = apiRes.Rule.URL.AllowRoleID
 	res.Rule.URL.AllowChannelID = apiRes.Rule.URL.AllowChannelID
-	res.Rule.URL.AlertChannelID = apiRes.Rule.URL.AlertChannelID
 
 	for _, v := range apiRes.Block {
 		blockRes := resBlock{}

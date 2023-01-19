@@ -27,7 +27,6 @@ type URLRuleReq struct {
 	IsDiscordAllow bool
 	AllowRoleID    []string
 	AllowChannelID []string
-	AlertChannelID string
 }
 
 // 全ての設定を更新します
@@ -130,14 +129,9 @@ func (a *App) UpdateConfig(
 			allowChannelID = append(allowChannelID, alChID)
 		}
 
-		alChID := urlRuleReq.AlertChannelID
-		if alChID == "" {
-			alChID = "none"
-		}
-		alertChannelID, err := model.NewChannelID(alChID)
-		if err != nil {
-			return "", errors.NewError("アラートを送信するチャンネルIDを作成できません", err)
-		}
+		// FEから通知チャンネルを受け取らないようにしたため、
+		// 空のチャンネルIDを生成します。
+		alertChannelID := model.ChannelID{}
 
 		urlRule, err = rule.NewURL(
 			urlRuleReq.IsRestrict,

@@ -19,7 +19,7 @@ type Res struct {
 			IsDiscordAllow bool
 			AllowRoleID    []string
 			AllowChannelID []string
-			AlertChannelID string
+			//AlertChannelID string
 		}
 	}
 }
@@ -86,7 +86,7 @@ func CreateRes(m map[string]interface{}) (Res, error) {
 		res.Rule.URL.IsDiscordAllow = seeker.Bool(m, []string{"rule", "url", "is_discord_allow"})
 		res.Rule.URL.AllowRoleID = allowRoleID
 		res.Rule.URL.AllowChannelID = allowChannelID
-		res.Rule.URL.AlertChannelID = seeker.Str(m, []string{"rule", "url", "alert_channel_id", "value"})
+		//res.Rule.URL.AlertChannelID = seeker.Str(m, []string{"rule", "url", "alert_channel_id", "value"})
 	}
 
 	return res, nil

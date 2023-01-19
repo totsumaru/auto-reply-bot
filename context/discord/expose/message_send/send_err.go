@@ -27,7 +27,7 @@ func SendErrMsg(s *discordgo.Session, e error, serverName string) {
 // インタラクションの失敗メッセージを送信します
 func SendEphemeralInteractionErrMsg(s *discordgo.Session, i *discordgo.InteractionCreate, e error) {
 	embed := &discordgo.MessageEmbed{
-		Title:       "エラーが発生しました",
+		Title:       "ERROR",
 		Description: e.Error(),
 		Color:       conf.ColorRed,
 		Timestamp:   now.GetNowTimeStamp(),
