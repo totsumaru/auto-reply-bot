@@ -1,6 +1,7 @@
 package guild
 
 import (
+	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )
@@ -21,7 +22,7 @@ func GetGuild(s *discordgo.Session, guildID string) (*discordgo.Guild, error) {
 func GetGuildName(s *discordgo.Session, guildID string) (string, error) {
 	g, err := s.Guild(guildID)
 	if err != nil {
-		return "", errors.NewError("ギルドを取得できません", err)
+		return "", errors.NewError(fmt.Sprintf("ギルドを取得できません[ID: %s]", guildID), err)
 	}
 
 	return g.Name, nil
