@@ -75,19 +75,20 @@ func URL(s *discordgo.Session, m *discordgo.MessageCreate) {
 				allowURLs = append(allowURLs, "Discord")
 			}
 
-			fixedContent := strings.Replace(m.Content, "http", "h ttp", -1)
+			fixedContent := strings.Replace(m.Content, "http", "[⚠️信頼できるURLですか？] http", -1)
 
-			req := message_send.SendMessageEmbedReq{
+			req := message_send.SendMessageEmbedWithIconReq{
 				ChannelID: m.ChannelID,
 				Content: fmt.Sprintf(
 					shared.InvalidURLReplyTmpl,
 					fixedContent,
-					allowURLs,
-					m.Author.ID,
 				),
-				Color: conf.ColorBlack,
+				Color:      conf.ColorBlack,
+				Name:       m.Author.Username,
+				IconURL:    m.Author.AvatarURL(""),
+				FooterText: fmt.Sprintf("スキャム対策として、このサーバーでは%s以外のURLはbotが監視しています。", allowURLs),
 			}
-			if err = message_send.SendMessageEmbed(s, req); err != nil {
+			if err = message_send.SendMessageEmbedWithIcon(s, req); err != nil {
 				message_send.SendErrMsg(s, errors.NewError("埋め込みメッセージを送信できません", err), guildName)
 			}
 		}
