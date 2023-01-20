@@ -9,6 +9,7 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/bff/bot/handler/guild_create"
 	"github.com/techstart35/auto-reply-bot/context/bff/bot/handler/interaction_create"
 	"github.com/techstart35/auto-reply-bot/context/bff/bot/handler/message_create"
+	"github.com/techstart35/auto-reply-bot/context/bff/bot/handler/message_update"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"log"
 	"os"
@@ -50,6 +51,7 @@ func main() {
 		session.AddHandler(message_create.Handler)
 		session.AddHandler(guild_create.Handler)
 		session.AddHandler(interaction_create.Handler)
+		session.AddHandler(message_update.Handler)
 
 		if err = session.Open(); err != nil {
 			log.Fatalln(err)
