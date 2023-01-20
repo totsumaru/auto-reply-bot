@@ -20,6 +20,11 @@ func URL(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	// Webhookはカウントしません
+	if m.Author == nil {
+		return
+	}
+
 	// Botユーザーはカウントしません
 	if m.Author.Bot {
 		return

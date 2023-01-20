@@ -20,8 +20,15 @@ func URL(s *discordgo.Session, m *discordgo.MessageUpdate) {
 		return
 	}
 
-	// botユーザーの判定は送信時に行っているので、ここでは実施しません。
-	// 使用するとPanicとなることがあるので注意してください。
+	// Webhookはカウントしません
+	if m.Author == nil {
+		return
+	}
+
+	// Botユーザーはカウントしません
+	if m.Author.Bot {
+		return
+	}
 
 	guildName, err := guild.GetGuildName(s, m.GuildID)
 	if err != nil {
