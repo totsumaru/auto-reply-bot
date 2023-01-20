@@ -1,4 +1,4 @@
-package message_create
+package message_update
 
 import (
 	"github.com/bwmarrin/discordgo"
@@ -6,7 +6,7 @@ import (
 )
 
 // URL制限について確認します
-func URL(s *discordgo.Session, m *discordgo.MessageCreate) {
-	// 処理内容はmessage_updateと同じのため、sharedにて共通化しています。
+func URL(s *discordgo.Session, m *discordgo.MessageUpdate) {
+	// 処理内容はmessage_createと同じのため、sharedにて共通化しています。
 	shared.CheckAndHandleURLContainMessage(s, m.Message)
 }
