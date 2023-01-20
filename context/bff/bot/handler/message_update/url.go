@@ -8,7 +8,7 @@ import (
 // URL制限について確認します
 func URL(s *discordgo.Session, m *discordgo.MessageUpdate) {
 	// 処理内容はmessage_createと同じのため、sharedにて共通化しています。
-	if m.Message != nil {
+	if s != nil && m.Message != nil {
 		shared.CheckAndHandleURLContainMessage(s, m.Message)
 	}
 }
