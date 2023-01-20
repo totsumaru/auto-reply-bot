@@ -75,7 +75,12 @@ func URL(s *discordgo.Session, m *discordgo.MessageUpdate) {
 				allowURLs = append(allowURLs, "Discord")
 			}
 
-			fixedContent := strings.Replace(m.Content, "http", "[⚠️信頼できるURLですか？] http", -1)
+			fixedContent := strings.Replace(
+				m.Content,
+				"http",
+				"\n**[URLが含まれています: 信頼できる場合のみ、アクセスしてください👇]**\n ⚠️ http",
+				-1,
+			)
 
 			req := message_send.SendMessageEmbedWithIconReq{
 				ChannelID: m.ChannelID,
@@ -83,7 +88,7 @@ func URL(s *discordgo.Session, m *discordgo.MessageUpdate) {
 					shared.InvalidURLReplyTmpl,
 					fixedContent,
 				),
-				Color:      conf.ColorBlack,
+				Color:      conf.ColorGray,
 				Name:       m.Author.Username,
 				IconURL:    m.Author.AvatarURL(""),
 				FooterText: fmt.Sprintf("スキャム対策として、このサーバーでは%s以外のURLはbotが監視しています。", allowURLs),

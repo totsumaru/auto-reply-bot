@@ -17,4 +17,5 @@ const (
 	ColorBlack  = 0x000000
 	ColorYellow = 0xffd700
 	ColorCyan   = 0x00ffff
+	ColorGray   = 0x808080
 )
