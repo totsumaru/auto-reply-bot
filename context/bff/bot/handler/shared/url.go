@@ -1,13 +1,8 @@
 package shared
 
 import (
-	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/check"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/manage_message"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/rule"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
@@ -25,86 +20,8 @@ const InvalidURLReplyTmpl = `
 送信者: <@%s>
 `
 
-// URLが送信された時の処理を行います
-//
-// メッセージの"作成時"と"更新時"のどちらも同じ処理となります。
-func CheckAndHandleURLContainMessage(s *discordgo.Session, m *discordgo.Message) {
-	// TEST SERVERはカウントしません
-	if m.GuildID == conf.TestServerID {
-		return
-	}
-
-	// Botユーザーはカウントしません
-	if m.Author.Bot {
-		return
-	}
-
-	guildName, err := guild.GetGuildName(s, m.GuildID)
-	if err != nil {
-		message_send.SendErrMsg(s, errors.NewError("ギルド名を取得できません", err), "")
-		return
-	}
-
-	storeRes, err := v1.GetStoreRes(m.GuildID)
-	if err != nil {
-		message_send.SendErrMsg(s, errors.NewError("IDでサーバーを取得できません", err), guildName)
-		return
-	}
-
-	ok, err := isAllowedURLMessage(s, storeRes, m.Author.ID, m.ChannelID, m.Content)
-	if err != nil {
-		message_send.SendErrMsg(s, errors.NewError("IDでサーバーを取得できません", err), guildName)
-		return
-	}
-	if !ok {
-		// 不正URLの含まれたメッセージを削除します
-		{
-			if err := manage_message.DeleteMessage(s, m.ChannelID, m.ID); err != nil {
-				message_send.SendErrMsg(s, errors.NewError("メッセージを削除できません", err), guildName)
-				return
-			}
-		}
-
-		// 投稿されたチャンネルにメッセージを返します
-		{
-			allowURLs := make([]string, 0)
-			if storeRes.Rule.URL.IsYoutubeAllow {
-				allowURLs = append(allowURLs, "YouTube")
-			}
-			if storeRes.Rule.URL.IsTwitterAllow {
-				allowURLs = append(allowURLs, "Twitter")
-			}
-			if storeRes.Rule.URL.IsGIFAllow {
-				allowURLs = append(allowURLs, "GIF")
-			}
-			if storeRes.Rule.URL.IsOpenseaAllow {
-				allowURLs = append(allowURLs, "Opensea")
-			}
-			if storeRes.Rule.URL.IsDiscordAllow {
-				allowURLs = append(allowURLs, "Discord")
-			}
-
-			fixedContent := strings.Replace(m.Content, "http", "h ttp", -1)
-
-			req := message_send.SendMessageEmbedReq{
-				ChannelID: m.ChannelID,
-				Content: fmt.Sprintf(
-					InvalidURLReplyTmpl,
-					fixedContent,
-					allowURLs,
-					m.Author.ID,
-				),
-				Color: conf.ColorBlack,
-			}
-			if err = message_send.SendMessageEmbed(s, req); err != nil {
-				message_send.SendErrMsg(s, errors.NewError("埋め込みメッセージを送信できません", err), guildName)
-			}
-		}
-	}
-}
-
 // メッセージが許可されているか検証します
-func isAllowedURLMessage(
+func IsAllowedURLMessage(
 	s *discordgo.Session,
 	storeRes v1.Res,
 	authorID string,
