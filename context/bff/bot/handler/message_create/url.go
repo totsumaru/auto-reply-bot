@@ -10,6 +10,7 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
+	"regexp"
 	"strings"
 )
 
@@ -75,12 +76,18 @@ func URL(s *discordgo.Session, m *discordgo.MessageCreate) {
 				allowURLs = append(allowURLs, "Discord")
 			}
 
-			fixedContent := strings.Replace(
-				m.Content,
-				"http",
-				"\n**[URLが含まれています: 信頼できる場合のみ、アクセスしてください👇]**\n ⚠️ http",
-				-1,
-			)
+			fixedContent := m.Content
+			r := regexp.MustCompile("https?://[\\w!?/+\\-_~;.,*&@#$%()'[\\]]+")
+			// URLは 打ち消し線 + httpを無効 にして送信します
+			findURL := r.FindString(m.Content)
+			if findURL != "" {
+				fixedContent = strings.Replace(
+					fixedContent,
+					findURL,
+					fmt.Sprintf("~~%s~~", strings.Replace(findURL, "http", "h ttp", -1)),
+					-1,
+				)
+			}
 
 			req := message_send.SendMessageEmbedWithIconReq{
 				ChannelID: m.ChannelID,
@@ -91,7 +98,7 @@ func URL(s *discordgo.Session, m *discordgo.MessageCreate) {
 				Color:      conf.ColorGray,
 				Name:       m.Author.Username,
 				IconURL:    m.Author.AvatarURL(""),
-				FooterText: fmt.Sprintf("スキャム対策として、このサーバーでは%s以外のURLはbotが監視しています。", allowURLs),
+				FooterText: fmt.Sprintf("スキャム対策として、このサーバーでは%s以外のURLはbotが無効化しています。", allowURLs),
 			}
 			if err = message_send.SendMessageEmbedWithIcon(s, req); err != nil {
 				message_send.SendErrMsg(s, errors.NewError("埋め込みメッセージを送信できません", err), guildName)
