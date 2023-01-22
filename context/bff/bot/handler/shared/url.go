@@ -12,6 +12,8 @@ import (
 // 不正URLが送信された時の削除後のメッセージです
 const InvalidURLReplyTmpl = `
 %s
+
+▬▬▬▬▬▬▬▬
 `
 
 // メッセージが許可されているか検証します
