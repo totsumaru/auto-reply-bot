@@ -7,10 +7,10 @@ import (
 
 const (
 	// 1つのブロックに設定できるキーワードの上限数です
-	KeyWordMaxAmount = 5
+	KeyWordMaxAmount = 10
 
 	// 1つのブロックに設定できる返信の上限数です
-	ReplyMaxAmount = 5
+	ReplyMaxAmount = 10
 )
 
 // ブロックです
