@@ -23,16 +23,14 @@
 ## 新規サーバーへの導入手順
 
 1. TwitterのDMに依頼をもらう
-2. 無料期間を案内した後、[Google Form](https://forms.gle/6pmaX1bX7bdzvvGi9)を送る → 回答後に導入URLあり
+2. [Google Form](https://forms.gle/6pmaX1bX7bdzvvGi9)を送る → 回答後に導入URLあり
 3. ※ユーザー対応: URLからbotの導入
 4. `/create-server`コマンドでDBにレコードを作成
-5. [botのコンパネ](https://discord.com/developers/applications/1056843645967413309/oauth2/general)からリダイレクトURLを設定
-6. [Notion](https://www.notion.so/bot-92d5460b67d3407893343008d1821a49)に情報を追加
+5. ユーザーのコンパネから管理者ロールを設定
 
 ## 有料移行時の手順
 
-1. 終了5日前に有料に移行するか聞く（しない場合はbotを削除してもらって終了）
-2. stripeのURL（）を送付
+未定
 
 ## インフラ構成
 
@@ -44,6 +42,18 @@
     - さくらのドメイン（[auto-reply-bot](https://auto-reply-bot)）
 
 #### 権限
+
+[ デフォルト ]
+
+- Admin
+
+Permission
+
+```
+8
+```
+
+[ 必要最低限 ]
 
 - Read Messages/View Channels
 - Send Messages
@@ -86,36 +96,97 @@ GET /server
 ```json
 {
   "id": "1055315616002740294",
-  "admin_role_id": "1055362036495826964",
+  "admin_role_id": "1056464506554957824",
   "block": [
     {
-      "name": "あいさつ",
+      "name": "hello",
       "keyword": [
-        "hello",
-        "world"
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
       ],
       "reply": [
-        "good",
-        "very good"
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
       ],
-      "match_condition": "all-match",
+      "match_condition": "one-contain",
       "is_random": true,
+      "is_embed": true
+    },
+    {
+      "name": "おはよう",
+      "keyword": [
+        "おはよう"
+      ],
+      "reply": [
+        "おはようございます！"
+      ],
+      "match_condition": "all-contain",
+      "is_random": false,
       "is_embed": false
     }
   ],
-  "token": "abcd0123",
+  "token": "hAYNUK7nWPkNYd20Fmo9cJ7cvDsk8M",
   "server_name": "TEST 2",
-  "avatar_url": "https://cdn.discordapp.com/icons/1055315616002740294/c17fe110e848098db614687645f17586.png",
+  "avatar_url": "",
   "role": [
     {
-      "id": "1055315616002740294",
-      "name": "@everyone"
+      "id": "1055362036495826964",
+      "name": "自動返信botの管理者"
     },
     {
-      "id": "1055350145975328863",
+      "id": "1056464506554957824",
+      "name": "テストロールです"
+    },
+    {
+      "id": "1056544962973532196",
       "name": "[test]自動返信bot"
+    },
+    {
+      "id": "1056894585156145207",
+      "name": "Comment-bot"
     }
-  ]
+  ],
+  "channel": [
+    {
+      "id": "1055315616002740297",
+      "name": "一般"
+    },
+    {
+      "id": "1055359277683986433",
+      "name": "掲示板"
+    }
+  ],
+  "nickname": "",
+  "rule": {
+    "url": {
+      "is_restrict": true,
+      "is_youtube_allow": false,
+      "is_twitter_allow": true,
+      "is_gif_allow": false,
+      "is_opensea_allow": false,
+      "is_discord_allow": false,
+      "allow_role_id": [
+        "1056464506554957824"
+      ],
+      "allow_channel_id": []
+    }
+  }
 }
 ```
 
@@ -147,23 +218,65 @@ POST /server/config
 
 ```json
 {
-  "admin_role_id": "1055362036495826964",
+  "admin_role_id": "1056464506554957824",
   "block": [
     {
-      "name": "あいさつ",
+      "name": "hello",
       "keyword": [
-        "hello",
-        "world"
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
       ],
       "reply": [
-        "good",
-        "very good"
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
       ],
-      "match_condition": "all-match",
+      "match_condition": "one-contain",
       "is_random": true,
+      "is_embed": true
+    },
+    {
+      "name": "おはよう",
+      "keyword": [
+        "おはよう"
+      ],
+      "reply": [
+        "おはようございます！"
+      ],
+      "match_condition": "all-contain",
+      "is_random": false,
       "is_embed": false
     }
-  ]
+  ],
+  "rule": {
+    "url": {
+      "is_restrict": true,
+      "is_youtube_allow": false,
+      "is_twitter_allow": true,
+      "is_gif_allow": false,
+      "is_opensea_allow": false,
+      "is_discord_allow": false,
+      "allow_role_id": [
+        "1056464506554957824"
+      ],
+      "allow_channel_id": []
+    }
+  }
 }
 ```
 
@@ -172,34 +285,54 @@ POST /server/config
 ```json
 {
   "id": "1055315616002740294",
-  "admin_role_id": "1055362036495826964",
+  "admin_role_id": "1056464506554957824",
   "block": [
     {
-      "name": "あいさつ",
+      "name": "hello",
       "keyword": [
-        "hello",
-        "world"
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
       ],
       "reply": [
-        "good",
-        "very good"
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
       ],
-      "match_condition": "all-match",
+      "match_condition": "one-contain",
       "is_random": true,
+      "is_embed": true
+    },
+    {
+      "name": "おはよう",
+      "keyword": [
+        "おはよう"
+      ],
+      "reply": [
+        "おはようございます！"
+      ],
+      "match_condition": "all-contain",
+      "is_random": false,
       "is_embed": false
     }
   ],
   "server_name": "TEST 2",
-  "avatar_url": "https://cdn.discordapp.com/icons/1055315616002740294/c17fe110e848098db614687645f17586.png",
+  "avatar_url": "",
   "role": [
-    {
-      "id": "1055315616002740294",
-      "name": "@everyone"
-    },
-    {
-      "id": "1055350145975328863",
-      "name": "[test]自動返信bot"
-    },
     {
       "id": "1055362036495826964",
       "name": "自動返信botの管理者"
@@ -207,8 +340,40 @@ POST /server/config
     {
       "id": "1056464506554957824",
       "name": "テストロールです"
+    },
+    {
+      "id": "1056544962973532196",
+      "name": "[test]自動返信bot"
+    },
+    {
+      "id": "1056894585156145207",
+      "name": "Comment-bot"
     }
-  ]
+  ],
+  "channel": [
+    {
+      "id": "1055315616002740297",
+      "name": "一般"
+    },
+    {
+      "id": "1055359277683986433",
+      "name": "掲示板"
+    }
+  ],
+  "rule": {
+    "url": {
+      "is_restrict": true,
+      "is_youtube_allow": false,
+      "is_twitter_allow": true,
+      "is_gif_allow": false,
+      "is_opensea_allow": false,
+      "is_discord_allow": false,
+      "allow_role_id": [
+        "1056464506554957824"
+      ],
+      "allow_channel_id": []
+    }
+  }
 }
 ```
 
@@ -242,7 +407,7 @@ POST /server/config
 
 - `TEST SERVER`でのみ実行可能
 
-### 3. ヘルプ(Adminのみ)
+### 3. ヘルプ(Admin,Owner,Dev)
 
 ```
 /help
@@ -257,3 +422,33 @@ POST /server/config
 ##### アクセスできるサーバー
 
 - 全てのサーバーで実行可能
+
+## セキュリティについて
+
+### 1.VPSがハックされた場合
+
+[ ハッカーができること ]
+
+- botを使用してスキャムURLを流す(everyoneも可能)
+
+[ 盗まれる情報 ]
+
+- botのアクセストークン
+- プログラム（書き換え可能）
+
+[ ハックされた時の対応 ]
+
+- アクセストークンを再発行（https://discord.com/developers/applications/1056843645967413309/bot）
+
+### 2.Discordがハックされた場合
+
+[ ハッカーができること ]
+
+- Totsumaru#7777 のアカウントを使用
+- Totsumaru#7777 のパスワードを変更
+- botの情報にアクセス & アクセストークンを再設定
+
+[ ハックされた時の対応 ]
+
+- パスワードの再設定
+- アクセストークンを再発行（https://discord.com/developers/applications/1056843645967413309/bot）
