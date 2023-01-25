@@ -77,7 +77,7 @@ func URL(s *discordgo.Session, m *discordgo.MessageUpdate) {
 			}
 
 			fixedContent := m.Content
-			r := regexp.MustCompile("https?://[\\w!?/+\\-_~;.,*&@#$%()'[\\]]+")
+			r := regexp.MustCompile("https?://[\\w!?/+\\-_~;:.,*=&@#$%()'[\\]]+")
 			// URLは 打ち消し線 + httpを無効 にして送信します
 			findURL := r.FindString(m.Content)
 			if findURL != "" {
