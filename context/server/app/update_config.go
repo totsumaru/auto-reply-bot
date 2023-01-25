@@ -8,7 +8,26 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )
 
-// 全ての設定の更新をするブロックのリクエストです
+// リクエストです
+type Req struct {
+	AdminRoleID string
+	Comment     struct {
+		BlockReq        []BlockReq
+		IgnoreChannelID []string
+	}
+	URLRule struct {
+		IsRestrict     bool
+		IsYoutubeAllow bool
+		IsTwitterAllow bool
+		IsGIFAllow     bool
+		IsOpenseaAllow bool
+		IsDiscordAllow bool
+		AllowRoleID    []string
+		AllowChannelID []string
+	}
+}
+
+// ブロックのリクエストです
 type BlockReq struct {
 	Name           string
 	Keyword        []string
@@ -18,27 +37,10 @@ type BlockReq struct {
 	IsEmbed        bool
 }
 
-// URL制御のリクエストです
-type URLRuleReq struct {
-	IsRestrict     bool
-	IsYoutubeAllow bool
-	IsTwitterAllow bool
-	IsGIFAllow     bool
-	IsOpenseaAllow bool
-	IsDiscordAllow bool
-	AllowRoleID    []string
-	AllowChannelID []string
-}
-
 // 全ての設定を更新します
 //
 // IDを返します。
-func (a *App) UpdateConfig(
-	serverID string,
-	adminRoleID string,
-	blockReq []BlockReq,
-	urlRuleReq URLRuleReq,
-) (string, error) {
+func (a *App) UpdateConfig(serverID string, req Req) (string, error) {
 	i, err := model.NewID(serverID)
 	if err != nil {
 		return "", errors.NewError("idを作成できません", err)
@@ -49,13 +51,13 @@ func (a *App) UpdateConfig(
 		return "", errors.NewError("IDでサーバーを取得できません", err)
 	}
 
-	roleID, err := model.NewRoleID(adminRoleID)
+	roleID, err := model.NewRoleID(req.AdminRoleID)
 	if err != nil {
 		return "", errors.NewError("管理者のロールIDを作成できません", err)
 	}
 
 	blocks := make([]block.Block, 0)
-	for _, bReq := range blockReq {
+	for _, bReq := range req.Comment.BlockReq {
 		// 名前
 		name, err := block.NewName(bReq.Name)
 		if err != nil {
@@ -113,7 +115,7 @@ func (a *App) UpdateConfig(
 	urlRule := rule.URL{}
 	{
 		allowRoleID := make([]model.RoleID, 0)
-		for _, v := range urlRuleReq.AllowRoleID {
+		for _, v := range req.URLRule.AllowRoleID {
 			alRoleID, err := model.NewRoleID(v)
 			if err != nil {
 				return "", errors.NewError("ロールIDを作成できません", err)
@@ -122,7 +124,7 @@ func (a *App) UpdateConfig(
 		}
 
 		allowChannelID := make([]model.ChannelID, 0)
-		for _, v := range urlRuleReq.AllowChannelID {
+		for _, v := range req.URLRule.AllowChannelID {
 			alChID, err := model.NewChannelID(v)
 			if err != nil {
 				return "", errors.NewError("チャンネルIDを作成できません", err)
@@ -135,12 +137,12 @@ func (a *App) UpdateConfig(
 		alertChannelID := model.ChannelID{}
 
 		urlRule, err = rule.NewURL(
-			urlRuleReq.IsRestrict,
-			urlRuleReq.IsYoutubeAllow,
-			urlRuleReq.IsTwitterAllow,
-			urlRuleReq.IsGIFAllow,
-			urlRuleReq.IsOpenseaAllow,
-			urlRuleReq.IsDiscordAllow,
+			req.URLRule.IsRestrict,
+			req.URLRule.IsYoutubeAllow,
+			req.URLRule.IsTwitterAllow,
+			req.URLRule.IsGIFAllow,
+			req.URLRule.IsOpenseaAllow,
+			req.URLRule.IsDiscordAllow,
 			allowRoleID,
 			allowChannelID,
 			alertChannelID,
@@ -161,8 +163,19 @@ func (a *App) UpdateConfig(
 		return "", errors.NewError("管理者のロールIDを更新できません", err)
 	}
 
+	// コメントを無視するチャンネルを作成します
+	ignoreCh := make([]model.ChannelID, 0)
+	for _, chID := range req.Comment.IgnoreChannelID {
+		cID, err := model.NewChannelID(chID)
+		if err != nil {
+			return "", errors.NewError("チャンネルIDを作成できません", err)
+		}
+
+		ignoreCh = append(ignoreCh, cID)
+	}
+
 	// コメントを作成します
-	c, err := comment.NewComment(blocks)
+	c, err := comment.NewComment(blocks, ignoreCh)
 	if err != nil {
 		return "", errors.NewError("コメントを作成できません", err)
 	}

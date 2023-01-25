@@ -9,6 +9,27 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )
 
+// リクエストです
+type Req struct {
+	AdminRoleID string
+	Comment     struct {
+		BlockReq        []BlockReq
+		IgnoreChannelID []string
+	}
+	Rule struct {
+		URL struct {
+			IsRestrict     bool
+			IsYoutubeAllow bool
+			IsTwitterAllow bool
+			IsGIFAllow     bool
+			IsOpenseaAllow bool
+			IsDiscordAllow bool
+			AllowRoleID    []string
+			AllowChannelID []string
+		}
+	}
+}
+
 // ブロックのリクエストです
 type BlockReq struct {
 	Name           string
@@ -19,18 +40,6 @@ type BlockReq struct {
 	IsEmbed        bool
 }
 
-// URL制限のリクエストです
-type URLRuleReq struct {
-	IsRestrict     bool
-	IsYoutubeAllow bool
-	IsTwitterAllow bool
-	IsGIFAllow     bool
-	IsOpenseaAllow bool
-	IsDiscordAllow bool
-	AllowRoleID    []string
-	AllowChannelID []string
-}
-
 // 設定を更新します
 //
 // 管理者ロールを持っている or 該当サーバーの管理者権限 のみがコールできます。
@@ -38,9 +47,7 @@ func UpdateConfig(
 	s *discordgo.Session,
 	ctx context.Context,
 	serverID string,
-	adminRoleID string,
-	blockReq []BlockReq,
-	urlRuleReq URLRuleReq,
+	req Req,
 ) (Res, error) {
 	res := Res{}
 
@@ -59,7 +66,7 @@ func UpdateConfig(
 	}
 
 	appBlockReq := make([]app.BlockReq, 0)
-	for _, v := range blockReq {
+	for _, v := range req.Comment.BlockReq {
 		bl := app.BlockReq{
 			Name:           v.Name,
 			Keyword:        v.Keyword,
@@ -72,9 +79,35 @@ func UpdateConfig(
 		appBlockReq = append(appBlockReq, bl)
 	}
 
-	appURLRuleReq := app.URLRuleReq(urlRuleReq)
+	blockReqs := make([]app.BlockReq, 0)
+	for _, br := range req.Comment.BlockReq {
+		bReq := app.BlockReq{
+			Name:           br.Name,
+			Keyword:        br.Keyword,
+			Reply:          br.Reply,
+			MatchCondition: br.MatchCondition,
+			IsRandom:       br.IsRandom,
+			IsEmbed:        br.IsEmbed,
+		}
+		blockReqs = append(blockReqs, bReq)
+	}
 
-	appResID, err := a.UpdateConfig(serverID, adminRoleID, appBlockReq, appURLRuleReq)
+	appReq := app.Req{}
+	appReq.AdminRoleID = req.AdminRoleID
+	// Comment
+	appReq.Comment.BlockReq = blockReqs
+	appReq.Comment.IgnoreChannelID = req.Comment.IgnoreChannelID
+	// URL-Rule
+	appReq.URLRule.IsRestrict = req.Rule.URL.IsRestrict
+	appReq.URLRule.IsYoutubeAllow = req.Rule.URL.IsYoutubeAllow
+	appReq.URLRule.IsTwitterAllow = req.Rule.URL.IsTwitterAllow
+	appReq.URLRule.IsGIFAllow = req.Rule.URL.IsGIFAllow
+	appReq.URLRule.IsOpenseaAllow = req.Rule.URL.IsOpenseaAllow
+	appReq.URLRule.IsDiscordAllow = req.Rule.URL.IsDiscordAllow
+	appReq.URLRule.AllowRoleID = req.Rule.URL.AllowRoleID
+	appReq.URLRule.AllowChannelID = req.Rule.URL.AllowChannelID
+
+	appResID, err := a.UpdateConfig(serverID, appReq)
 	if err != nil {
 		return res, errors.NewError("設定を更新できません", err)
 	}

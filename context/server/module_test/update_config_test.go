@@ -34,23 +34,22 @@ func TestUpdateConfig(t *testing.T) {
 			IsEmbed:        true,
 		}
 
-		urlRuleReq := v1.URLRuleReq{
-			IsRestrict:     true,
-			IsYoutubeAllow: true,
-			IsTwitterAllow: true,
-			IsGIFAllow:     true,
-			AllowRoleID:    []string{"r1", "r2"},
-			AllowChannelID: []string{"c1", "c2"},
-		}
+		req := v1.Req{}
+		req.AdminRoleID = TestAdminRoleID
+		// Comment
+		req.Comment.BlockReq = []v1.BlockReq{blockReq1}
+		req.Comment.IgnoreChannelID = []string{"ig1", "ig2"}
+		// Rule
+		req.Rule.URL.IsRestrict = true
+		req.Rule.URL.IsYoutubeAllow = true
+		req.Rule.URL.IsTwitterAllow = true
+		req.Rule.URL.IsGIFAllow = true
+		req.Rule.URL.IsOpenseaAllow = true
+		req.Rule.URL.IsDiscordAllow = true
+		req.Rule.URL.AllowRoleID = []string{"r1", "r2"}
+		req.Rule.URL.AllowChannelID = []string{"c1", "c2"}
 
-		res, err := v1.UpdateConfig(
-			&discordgo.Session{},
-			ctx,
-			TestID,
-			TestAdminRoleID,
-			[]v1.BlockReq{blockReq1},
-			urlRuleReq,
-		)
+		res, err := v1.UpdateConfig(&discordgo.Session{}, ctx, TestID, req)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -75,25 +74,25 @@ func TestUpdateConfig(t *testing.T) {
 		if !reflect.DeepEqual(res.Comment.Block, []v1.BlockRes{expectBlockRes}) {
 			t.Fatal("期待した値と一致しません")
 		}
-		if res.Rule.URL.IsRestrict != urlRuleReq.IsRestrict {
+		if res.Rule.URL.IsRestrict != req.Rule.URL.IsRestrict {
 			t.Fatal("期待した値と一致しません")
 		}
-		if res.Rule.URL.IsYoutubeAllow != urlRuleReq.IsYoutubeAllow {
+		if res.Rule.URL.IsYoutubeAllow != req.Rule.URL.IsYoutubeAllow {
 			t.Fatal("期待した値と一致しません")
 		}
-		if res.Rule.URL.IsTwitterAllow != urlRuleReq.IsTwitterAllow {
+		if res.Rule.URL.IsTwitterAllow != req.Rule.URL.IsTwitterAllow {
 			t.Fatal("期待した値と一致しません")
 		}
-		if res.Rule.URL.IsGIFAllow != urlRuleReq.IsGIFAllow {
+		if res.Rule.URL.IsGIFAllow != req.Rule.URL.IsGIFAllow {
 			t.Fatal("期待した値と一致しません")
 		}
-		if !reflect.DeepEqual(res.Rule.URL.AllowRoleID, urlRuleReq.AllowRoleID) {
+		if !reflect.DeepEqual(res.Rule.URL.AllowRoleID, req.Rule.URL.AllowRoleID) {
 			t.Fatal("期待した値と一致しません")
 		}
-		if !reflect.DeepEqual(res.Rule.URL.AllowRoleID, urlRuleReq.AllowRoleID) {
+		if !reflect.DeepEqual(res.Rule.URL.AllowRoleID, req.Rule.URL.AllowRoleID) {
 			t.Fatal("期待した値と一致しません")
 		}
-		if !reflect.DeepEqual(res.Rule.URL.AllowChannelID, urlRuleReq.AllowChannelID) {
+		if !reflect.DeepEqual(res.Rule.URL.AllowChannelID, req.Rule.URL.AllowChannelID) {
 			t.Fatal("期待した値と一致しません")
 		}
 	})
