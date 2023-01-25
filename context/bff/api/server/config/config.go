@@ -257,7 +257,7 @@ func postServerConfig(c *gin.Context) {
 	res.Rule.URL.AllowRoleID = apiRes.Rule.URL.AllowRoleID
 	res.Rule.URL.AllowChannelID = apiRes.Rule.URL.AllowChannelID
 
-	for _, v := range apiRes.Block {
+	for _, v := range apiRes.Comment.Block {
 		blockRes := resBlock{}
 		blockRes.Name = v.Name
 		blockRes.Keyword = v.Keyword

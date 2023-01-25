@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model"
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/comment"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/comment/block"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/rule"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
@@ -160,9 +161,15 @@ func (a *App) UpdateConfig(
 		return "", errors.NewError("管理者のロールIDを更新できません", err)
 	}
 
-	// ブロックを更新します
-	if err = s.UpdateBlock(blocks); err != nil {
-		return "", errors.NewError("ブロックを更新できません", err)
+	// コメントを作成します
+	c, err := comment.NewComment(blocks)
+	if err != nil {
+		return "", errors.NewError("コメントを作成できません", err)
+	}
+
+	// コメントを更新します
+	if err = s.UpdateComment(c); err != nil {
+		return "", errors.NewError("コメントを更新できません", err)
 	}
 
 	// ルールを更新します

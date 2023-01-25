@@ -39,7 +39,7 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	for _, block := range storeRes.Block {
+	for _, block := range storeRes.Comment.Block {
 		mustReply := true
 
 		switch block.MatchCondition {

@@ -72,7 +72,7 @@ func TestUpdateConfig(t *testing.T) {
 			IsEmbed:        blockReq1.IsEmbed,
 		}
 
-		if !reflect.DeepEqual(res.Block, []v1.BlockRes{expectBlockRes}) {
+		if !reflect.DeepEqual(res.Comment.Block, []v1.BlockRes{expectBlockRes}) {
 			t.Fatal("期待した値と一致しません")
 		}
 		if res.Rule.URL.IsRestrict != urlRuleReq.IsRestrict {

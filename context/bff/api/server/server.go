@@ -227,7 +227,7 @@ func getServer(c *gin.Context) {
 	res.Rule.URL.AllowChannelID = apiRes.Rule.URL.AllowChannelID
 
 	// レスポンスにブロックを追加します
-	for _, v := range apiRes.Block {
+	for _, v := range apiRes.Comment.Block {
 		blockRes := resBlock{}
 		blockRes.Name = v.Name
 		blockRes.Keyword = v.Keyword
