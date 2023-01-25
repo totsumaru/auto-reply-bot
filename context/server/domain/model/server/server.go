@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/block"
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/comment"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/rule"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )
@@ -18,6 +19,7 @@ type Server struct {
 	id          model.ID
 	adminRoleID model.RoleID
 	block       []block.Block
+	comment     comment.Comment
 	rule        rule.Rule
 }
 
@@ -116,21 +118,29 @@ func (u *Server) validate() error {
 
 // 構造体をJSONに変換します
 func (u *Server) MarshalJSON() ([]byte, error) {
+	// TODO: 修正が完了したら削除
+	c, err := comment.NewComment(u.block)
+	if err != nil {
+		return nil, errors.NewError("コメントを作成できません", err)
+	}
+
 	j := struct {
-		ID          model.ID      `json:"id"`
-		AdminRoleID model.RoleID  `json:"admin_role_id"`
-		Block       []block.Block `json:"block"`
-		Rule        rule.Rule     `json:"rule"`
+		ID          model.ID        `json:"id"`
+		AdminRoleID model.RoleID    `json:"admin_role_id"`
+		Block       []block.Block   `json:"block"`
+		Comment     comment.Comment `json:"comment"`
+		Rule        rule.Rule       `json:"rule"`
 	}{
 		ID:          u.id,
 		AdminRoleID: u.adminRoleID,
 		Block:       u.block,
+		Comment:     c,
 		Rule:        u.rule,
 	}
 
 	b, err := json.Marshal(j)
 	if err != nil {
-		return nil, errors.NewError("構造体をJSONに変換できません")
+		return nil, errors.NewError("構造体をJSONに変換できません", err)
 	}
 
 	return b, nil
@@ -139,10 +149,11 @@ func (u *Server) MarshalJSON() ([]byte, error) {
 // JSONを構造体を変換します
 func (u *Server) UnmarshalJSON(b []byte) error {
 	j := &struct {
-		ID          model.ID      `json:"id"`
-		AdminRoleID model.RoleID  `json:"admin_role_id"`
-		Block       []block.Block `json:"block"`
-		Rule        rule.Rule     `json:"rule"`
+		ID          model.ID        `json:"id"`
+		AdminRoleID model.RoleID    `json:"admin_role_id"`
+		Block       []block.Block   `json:"block"`
+		Comment     comment.Comment `json:"comment"`
+		Rule        rule.Rule       `json:"rule"`
 	}{}
 
 	if err := json.Unmarshal(b, &j); err != nil {
@@ -153,6 +164,13 @@ func (u *Server) UnmarshalJSON(b []byte) error {
 	u.adminRoleID = j.AdminRoleID
 	u.block = j.Block
 	u.rule = j.Rule
+
+	// TODO: 修正が完了したら削除
+	c, err := comment.NewComment(u.block)
+	if err != nil {
+		return errors.NewError("コメントを作成できません", err)
+	}
+	u.comment = c
 
 	return nil
 }
