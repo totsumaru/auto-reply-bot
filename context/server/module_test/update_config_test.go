@@ -2,7 +2,7 @@ package module_test
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/block"
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/comment/block"
 	"github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"reflect"
 	"testing"
