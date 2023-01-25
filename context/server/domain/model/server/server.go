@@ -3,8 +3,8 @@ package server
 import (
 	"encoding/json"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model"
-	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/block"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/comment"
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/comment/block"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/rule"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )

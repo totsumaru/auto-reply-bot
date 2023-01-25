@@ -5,7 +5,7 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
-	block2 "github.com/techstart35/auto-reply-bot/context/server/domain/model/server/block"
+	block2 "github.com/techstart35/auto-reply-bot/context/server/domain/model/server/comment/block"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 	"math/rand"
