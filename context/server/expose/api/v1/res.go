@@ -9,7 +9,8 @@ type Res struct {
 	ID          string
 	AdminRoleID string
 	Comment     struct {
-		Block []BlockRes
+		Block           []BlockRes
+		IgnoreChannelID []string
 	}
 	Rule struct {
 		URL struct {
@@ -39,7 +40,6 @@ type BlockRes struct {
 // レスポンスを作成します
 func CreateRes(m map[string]interface{}) (Res, error) {
 	blockRes := make([]BlockRes, 0)
-
 	for _, bl := range seeker.Slice(m, []string{"comment", "block"}) {
 		kw := make([]string, 0)
 		for _, k := range seeker.Slice(bl, []string{"keyword"}) {
@@ -62,13 +62,19 @@ func CreateRes(m map[string]interface{}) (Res, error) {
 		blockRes = append(blockRes, b)
 	}
 
-	res := Res{}
+	ignoreChannelIDRes := make([]string, 0)
+	for _, v := range seeker.Slice(m, []string{"comment", "ignore_channel_id"}) {
+		ignoreChannelIDRes = append(ignoreChannelIDRes, seeker.Str(v, []string{"value"}))
+	}
 
+	res := Res{}
 	res.ID = seeker.Str(m, []string{"id", "value"})
 	res.AdminRoleID = seeker.Str(m, []string{"admin_role_id", "value"})
+	// Comment
 	res.Comment.Block = blockRes
+	res.Comment.IgnoreChannelID = ignoreChannelIDRes
 
-	// URLルール
+	// Rule
 	{
 		allowRoleID := make([]string, 0)
 		for _, v := range seeker.Slice(m, []string{"rule", "url", "allow_role_id"}) {

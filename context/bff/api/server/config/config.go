@@ -1,6 +1,8 @@
 package config
 
 import (
+	"context"
+	"github.com/bwmarrin/discordgo"
 	"github.com/gin-gonic/gin"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/check"
@@ -20,16 +22,12 @@ func ServerConfig(e *gin.Engine) {
 }
 
 // リクエストBodyです
-type ReqConfig struct {
+type ReqBody struct {
 	AdminRoleID string `json:"admin_role_id"`
-	Block       []struct {
-		Name           string   `json:"name"`
-		Keyword        []string `json:"keyword"`
-		Reply          []string `json:"reply"`
-		MatchCondition string   `json:"match_condition"`
-		IsRandom       bool     `json:"is_random"`
-		IsEmbed        bool     `json:"is_embed"`
-	} `json:"block"`
+	Comment     struct {
+		Block           []blockReq `json:"block"`
+		IgnoreChannelID []string   `json:"ignore_channel_id"`
+	} `json:"comment"`
 	Rule struct {
 		URL struct {
 			IsRestrict     bool     `json:"is_restrict"`
@@ -44,12 +42,25 @@ type ReqConfig struct {
 	} `json:"rule"`
 }
 
+// ブロックのリクエストです
+type blockReq struct {
+	Name           string   `json:"name"`
+	Keyword        []string `json:"keyword"`
+	Reply          []string `json:"reply"`
+	MatchCondition string   `json:"match_condition"`
+	IsRandom       bool     `json:"is_random"`
+	IsEmbed        bool     `json:"is_embed"`
+}
+
 // レスポンスです
 type Res struct {
-	ID          string     `json:"id"`
-	AdminRoleID string     `json:"admin_role_id"`
-	Block       []resBlock `json:"block"`
-	Rule        struct {
+	ID          string `json:"id"`
+	AdminRoleID string `json:"admin_role_id"`
+	Comment     struct {
+		Block           []resBlock `json:"block"`
+		IgnoreChannelID []string   `json:"ignore_channel_id"`
+	} `json:"comment"`
+	Rule struct {
 		URL struct {
 			IsRestrict     bool     `json:"is_restrict"`
 			IsYoutubeAllow bool     `json:"is_youtube_allow"`
@@ -117,79 +128,33 @@ func postServerConfig(c *gin.Context) {
 	}
 
 	// 認証されているユーザーかを検証します
-	{
-		tmpRes, err := v1.FindByID(ctx, id)
-		if err != nil {
-			message_send.SendErrMsg(session, errors.NewError("IDでサーバーを取得できません", err), guildName)
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
-
-		userID, err := convert.TokenToDiscordID(token)
-		if err != nil {
-			message_send.SendErrMsg(session, errors.NewError("トークンをDiscordIDに変換できません", err), guildName)
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
-
-		guildOwnerID, err := guild.GetGuildOwnerID(session, id)
-		if err != nil {
-			message_send.SendErrMsg(session, errors.NewError("オーナーIDを取得できません", err), guildName)
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
-
-		if !(userID == conf.TotsumaruDiscordID || userID == guildOwnerID) {
-			ok, err := check.HasRole(session, id, userID, tmpRes.AdminRoleID)
-			if err != nil {
-				message_send.SendErrMsg(session, errors.NewError("ロールの所有確認に失敗しました", err), guildName)
-				c.JSON(http.StatusUnauthorized, "認証されていません")
-				return
-			}
-
-			if !ok {
-				c.JSON(http.StatusUnauthorized, "認証されていません")
-				return
-			}
-		}
+	ok, err := isAuthorizedUser(ctx, session, id, token)
+	if err != nil {
+		message_send.SendErrMsg(session, errors.NewError("認証されているかの確認に失敗しました", err), guildName)
+		c.JSON(http.StatusUnauthorized, "認証されていません")
+		return
+	}
+	if !ok {
+		c.JSON(http.StatusUnauthorized, "認証されていません")
+		return
 	}
 
-	var (
-		apiRes = v1.Res{}
-	)
+	apiRes := v1.Res{}
 
 	bffErr := (func() error {
-		req := &ReqConfig{}
-		if err = c.BindJSON(req); err != nil {
+		reqBody := &ReqBody{}
+		if err = c.BindJSON(reqBody); err != nil {
 			return errors.NewError("リクエストをJSONにバインドできません", err)
 		}
 
-		apiReqBlocks := make([]v1.BlockReq, 0)
-
-		for _, rb := range req.Block {
-			apiBlockReq := v1.BlockReq{}
-			apiBlockReq.Name = rb.Name
-			apiBlockReq.Keyword = rb.Keyword
-			apiBlockReq.Reply = rb.Reply
-			apiBlockReq.MatchCondition = rb.MatchCondition
-			apiBlockReq.IsRandom = rb.IsRandom
-			apiBlockReq.IsEmbed = rb.IsEmbed
-
-			apiReqBlocks = append(apiReqBlocks, apiBlockReq)
+		// BodyのリクエストからAPIのリクエストを作成します
+		apiReq, err := castReqBodyToAPIReq(reqBody)
+		if err != nil {
+			return errors.NewError("BodyからAPIのリクエストを作成できません", err)
 		}
 
-		apiRuleReq := v1.URLRuleReq{
-			IsRestrict:     req.Rule.URL.IsRestrict,
-			IsYoutubeAllow: req.Rule.URL.IsYoutubeAllow,
-			IsTwitterAllow: req.Rule.URL.IsTwitterAllow,
-			IsGIFAllow:     req.Rule.URL.IsGIFAllow,
-			IsOpenseaAllow: req.Rule.URL.IsOpenseaAllow,
-			IsDiscordAllow: req.Rule.URL.IsDiscordAllow,
-			AllowRoleID:    req.Rule.URL.AllowRoleID,
-			AllowChannelID: req.Rule.URL.AllowChannelID,
-		}
-
-		apiRes, err = v1.UpdateConfig(session, ctx, id, req.AdminRoleID, apiReqBlocks, apiRuleReq)
+		// APIをコールします
+		apiRes, err = v1.UpdateConfig(session, ctx, id, apiReq)
 		if err != nil {
 			return errors.NewError("設定を更新できません", err)
 		}
@@ -219,35 +184,107 @@ func postServerConfig(c *gin.Context) {
 		return
 	}
 
-	avatarURL, err := guild.GetAvatarURL(session, apiRes.ID)
+	// レスポンスを作成します
+	res, err := createRes(session, apiRes, guildName)
 	if err != nil {
-		message_send.SendErrMsg(session, errors.NewError("アバターURLを取得できません", err), guildName)
+		message_send.SendErrMsg(session, errors.NewError("レスポンスを作成できません", err), guildName)
 		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
-	allRoles, err := guild.GetAllRolesWithoutEveryone(session, apiRes.ID)
+	c.JSON(http.StatusOK, res)
+}
+
+// 認証されているユーザーかを検証します
+func isAuthorizedUser(ctx context.Context, s *discordgo.Session, id, token string) (bool, error) {
+	tmpRes, err := v1.FindByID(ctx, id)
 	if err != nil {
-		message_send.SendErrMsg(session, errors.NewError("全てのロールを取得できません", err), guildName)
-		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
-		return
+		return false, errors.NewError("IDでサーバーを取得できません", err)
 	}
 
-	allChannels, err := guild.GetAllTextChannels(session, apiRes.ID)
+	userID, err := convert.TokenToDiscordID(token)
 	if err != nil {
-		message_send.SendErrMsg(session, errors.NewError("全てのチャンネルを取得できません", err), guildName)
-		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
-		return
+		return false, errors.NewError("TokenをDiscordIDに変換できません", err)
 	}
 
+	guildOwnerID, err := guild.GetGuildOwnerID(s, id)
+	if err != nil {
+		return false, errors.NewError("ギルドのオーナーを取得できません", err)
+	}
+
+	// Dev/サーバーオーナー であればtrueを返します
+	if userID == conf.TotsumaruDiscordID || userID == guildOwnerID {
+		return true, nil
+	}
+
+	// botの操作ロールを持っているかを判別します
+	ok, err := check.HasRole(s, id, userID, tmpRes.AdminRoleID)
+	if err != nil {
+		return false, errors.NewError("ロールの所有確認に失敗しました", err)
+	}
+
+	return ok, nil
+}
+
+// ServerコンテキストへのAPIリクエストを作成します
+func castReqBodyToAPIReq(reqBody *ReqBody) (v1.Req, error) {
+	// ブロックのリクエストを作成します
+	apiReqBlocks := make([]v1.BlockReq, 0)
+	for _, rb := range reqBody.Comment.Block {
+		apiBlockReq := v1.BlockReq{}
+		apiBlockReq.Name = rb.Name
+		apiBlockReq.Keyword = rb.Keyword
+		apiBlockReq.Reply = rb.Reply
+		apiBlockReq.MatchCondition = rb.MatchCondition
+		apiBlockReq.IsRandom = rb.IsRandom
+		apiBlockReq.IsEmbed = rb.IsEmbed
+
+		apiReqBlocks = append(apiReqBlocks, apiBlockReq)
+	}
+
+	apiReq := v1.Req{}
+	apiReq.AdminRoleID = reqBody.AdminRoleID
+	// Comment
+	apiReq.Comment.BlockReq = apiReqBlocks
+	apiReq.Comment.IgnoreChannelID = reqBody.Comment.IgnoreChannelID
+	// Rule
+	apiReq.Rule.URL.IsRestrict = reqBody.Rule.URL.IsRestrict
+	apiReq.Rule.URL.IsYoutubeAllow = reqBody.Rule.URL.IsYoutubeAllow
+	apiReq.Rule.URL.IsTwitterAllow = reqBody.Rule.URL.IsTwitterAllow
+	apiReq.Rule.URL.IsGIFAllow = reqBody.Rule.URL.IsGIFAllow
+	apiReq.Rule.URL.IsOpenseaAllow = reqBody.Rule.URL.IsOpenseaAllow
+	apiReq.Rule.URL.IsDiscordAllow = reqBody.Rule.URL.IsDiscordAllow
+	apiReq.Rule.URL.AllowRoleID = reqBody.Rule.URL.AllowRoleID
+	apiReq.Rule.URL.AllowChannelID = reqBody.Rule.URL.AllowChannelID
+
+	return apiReq, nil
+}
+
+// レスポンスを作成します
+func createRes(s *discordgo.Session, apiRes v1.Res, guildName string) (Res, error) {
 	res := Res{}
+
+	avatarURL, err := guild.GetAvatarURL(s, apiRes.ID)
+	if err != nil {
+		return res, errors.NewError("アバターのURLを取得できません", err)
+	}
+
+	allRoles, err := guild.GetAllRolesWithoutEveryone(s, apiRes.ID)
+	if err != nil {
+		return res, errors.NewError("全てのロールを取得できません", err)
+	}
+
+	allChannels, err := guild.GetAllTextChannels(s, apiRes.ID)
+	if err != nil {
+		return res, errors.NewError("全てのチャンネルを取得できません", err)
+	}
+
 	res.ID = apiRes.ID
 	res.AdminRoleID = apiRes.AdminRoleID
-	res.Block = []resBlock{}
-	res.ServerName = guildName
-	res.AvatarURL = avatarURL
-	res.Role = []resRole{}
-	res.Channel = []resChannel{}
+	// Comment
+	res.Comment.Block = []resBlock{}
+	res.Comment.IgnoreChannelID = apiRes.Comment.IgnoreChannelID
+	// Rule
 	res.Rule.URL.IsRestrict = apiRes.Rule.URL.IsRestrict
 	res.Rule.URL.IsYoutubeAllow = apiRes.Rule.URL.IsYoutubeAllow
 	res.Rule.URL.IsTwitterAllow = apiRes.Rule.URL.IsTwitterAllow
@@ -256,7 +293,13 @@ func postServerConfig(c *gin.Context) {
 	res.Rule.URL.IsDiscordAllow = apiRes.Rule.URL.IsDiscordAllow
 	res.Rule.URL.AllowRoleID = apiRes.Rule.URL.AllowRoleID
 	res.Rule.URL.AllowChannelID = apiRes.Rule.URL.AllowChannelID
+	// Computed
+	res.ServerName = guildName
+	res.AvatarURL = avatarURL
+	res.Role = []resRole{}
+	res.Channel = []resChannel{}
 
+	// レスポンスにブロックを追加します
 	for _, v := range apiRes.Comment.Block {
 		blockRes := resBlock{}
 		blockRes.Name = v.Name
@@ -266,7 +309,7 @@ func postServerConfig(c *gin.Context) {
 		blockRes.IsRandom = v.IsRandom
 		blockRes.IsEmbed = v.IsEmbed
 
-		res.Block = append(res.Block, blockRes)
+		res.Comment.Block = append(res.Comment.Block, blockRes)
 	}
 
 	// レスポンスにロールを追加します
@@ -289,5 +332,5 @@ func postServerConfig(c *gin.Context) {
 		res.Channel = append(res.Channel, tmpChannel)
 	}
 
-	c.JSON(http.StatusOK, res)
+	return res, nil
 }
