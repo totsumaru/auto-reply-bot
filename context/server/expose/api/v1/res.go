@@ -8,8 +8,10 @@ import (
 type Res struct {
 	ID          string
 	AdminRoleID string
-	Block       []BlockRes
-	Rule        struct {
+	Comment     struct {
+		Block []BlockRes
+	}
+	Rule struct {
 		URL struct {
 			IsRestrict     bool
 			IsYoutubeAllow bool
@@ -38,7 +40,7 @@ type BlockRes struct {
 func CreateRes(m map[string]interface{}) (Res, error) {
 	blockRes := make([]BlockRes, 0)
 
-	for _, bl := range seeker.Slice(m, []string{"block"}) {
+	for _, bl := range seeker.Slice(m, []string{"comment", "block"}) {
 		kw := make([]string, 0)
 		for _, k := range seeker.Slice(bl, []string{"keyword"}) {
 			kw = append(kw, seeker.Str(k, []string{"value"}))
@@ -64,7 +66,7 @@ func CreateRes(m map[string]interface{}) (Res, error) {
 
 	res.ID = seeker.Str(m, []string{"id", "value"})
 	res.AdminRoleID = seeker.Str(m, []string{"admin_role_id", "value"})
-	res.Block = blockRes
+	res.Comment.Block = blockRes
 
 	// URLルール
 	{

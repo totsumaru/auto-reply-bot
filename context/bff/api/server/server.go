@@ -25,14 +25,7 @@ type Res struct {
 	ID          string     `json:"id"`
 	AdminRoleID string     `json:"admin_role_id"`
 	Block       []resBlock `json:"block"`
-	// 以下はComputedです
-	Token      string       `json:"token"`
-	ServerName string       `json:"server_name"`
-	AvatarURL  string       `json:"avatar_url"`
-	Role       []resRole    `json:"role"`
-	Channel    []resChannel `json:"channel"`
-	Nickname   string       `json:"nickname"`
-	Rule       struct {
+	Rule        struct {
 		URL struct {
 			IsRestrict     bool     `json:"is_restrict"`
 			IsYoutubeAllow bool     `json:"is_youtube_allow"`
@@ -44,6 +37,13 @@ type Res struct {
 			AllowChannelID []string `json:"allow_channel_id"`
 		} `json:"url"`
 	} `json:"rule"`
+	// 以下はComputedです
+	Token      string       `json:"token"`
+	ServerName string       `json:"server_name"`
+	AvatarURL  string       `json:"avatar_url"`
+	Role       []resRole    `json:"role"`
+	Channel    []resChannel `json:"channel"`
+	Nickname   string       `json:"nickname"`
 }
 
 // ブロックのレスポンスです
@@ -227,7 +227,7 @@ func getServer(c *gin.Context) {
 	res.Rule.URL.AllowChannelID = apiRes.Rule.URL.AllowChannelID
 
 	// レスポンスにブロックを追加します
-	for _, v := range apiRes.Block {
+	for _, v := range apiRes.Comment.Block {
 		blockRes := resBlock{}
 		blockRes.Name = v.Name
 		blockRes.Keyword = v.Keyword
