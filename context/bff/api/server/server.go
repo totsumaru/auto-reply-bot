@@ -22,10 +22,13 @@ func Server(e *gin.Engine) {
 
 // レスポンスです
 type Res struct {
-	ID          string     `json:"id"`
-	AdminRoleID string     `json:"admin_role_id"`
-	Block       []resBlock `json:"block"`
-	Rule        struct {
+	ID          string `json:"id"`
+	AdminRoleID string `json:"admin_role_id"`
+	Comment     struct {
+		Block           []resBlock `json:"block"`
+		IgnoreChannelID []string   `json:"ignore_channel_id"`
+	} `json:"comment"`
+	Rule struct {
 		URL struct {
 			IsRestrict     bool     `json:"is_restrict"`
 			IsYoutubeAllow bool     `json:"is_youtube_allow"`
@@ -216,13 +219,10 @@ func getServer(c *gin.Context) {
 	res := Res{}
 	res.ID = apiRes.ID
 	res.AdminRoleID = apiRes.AdminRoleID
-	res.Block = []resBlock{}
-	res.Token = token
-	res.ServerName = guildName
-	res.AvatarURL = avatarURL
-	res.Role = []resRole{}
-	res.Channel = []resChannel{}
-	res.Nickname = m.Nick
+	// Comment
+	res.Comment.Block = []resBlock{}
+	res.Comment.IgnoreChannelID = apiRes.Comment.IgnoreChannelID
+	// Rule
 	res.Rule.URL.IsRestrict = apiRes.Rule.URL.IsRestrict
 	res.Rule.URL.IsYoutubeAllow = apiRes.Rule.URL.IsYoutubeAllow
 	res.Rule.URL.IsTwitterAllow = apiRes.Rule.URL.IsTwitterAllow
@@ -231,6 +231,13 @@ func getServer(c *gin.Context) {
 	res.Rule.URL.IsDiscordAllow = apiRes.Rule.URL.IsDiscordAllow
 	res.Rule.URL.AllowRoleID = apiRes.Rule.URL.AllowRoleID
 	res.Rule.URL.AllowChannelID = apiRes.Rule.URL.AllowChannelID
+	// Computed
+	res.Token = token
+	res.ServerName = guildName
+	res.AvatarURL = avatarURL
+	res.Role = []resRole{}
+	res.Channel = []resChannel{}
+	res.Nickname = m.Nick
 
 	// レスポンスにブロックを追加します
 	for _, v := range apiRes.Comment.Block {
@@ -242,7 +249,7 @@ func getServer(c *gin.Context) {
 		blockRes.IsRandom = v.IsRandom
 		blockRes.IsEmbed = v.IsEmbed
 
-		res.Block = append(res.Block, blockRes)
+		res.Comment.Block = append(res.Comment.Block, blockRes)
 	}
 
 	// レスポンスにロールを追加します
