@@ -5,7 +5,7 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
-	block2 "github.com/techstart35/auto-reply-bot/context/server/domain/model/server/comment/block"
+	serverDomainBlock "github.com/techstart35/auto-reply-bot/context/server/domain/model/server/comment/block"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 	"math/rand"
@@ -31,40 +31,45 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	content := m.Content
-
 	storeRes, err := v1.GetStoreRes(m.GuildID)
 	if err != nil {
 		message_send.SendErrMsg(s, errors.NewError("IDでサーバーを取得できません", err), guildName)
 		return
 	}
 
+	// コメントを無効にするチャンネルの場合はここで終了
+	for _, chID := range storeRes.Comment.IgnoreChannelID {
+		if m.ChannelID == chID {
+			return
+		}
+	}
+
 	for _, block := range storeRes.Comment.Block {
 		mustReply := true
 
 		switch block.MatchCondition {
-		case block2.MatchConditionOneContain:
+		case serverDomainBlock.MatchConditionOneContain:
 			isContain := false
 			// [1つでも含む場合]1つでも含んでいるキーワードがあれば、
 			// isContainをtrueにしてここのループを終了
 			for _, keyword := range block.Keyword {
-				if strings.Contains(content, keyword) {
+				if strings.Contains(m.Content, keyword) {
 					isContain = true
 					break
 				}
 			}
 			mustReply = isContain
-		case block2.MatchConditionAllContain:
+		case serverDomainBlock.MatchConditionAllContain:
 			// [全て含む場合]1つでも含んでいないキーワードがあれば終了
 			for _, keyword := range block.Keyword {
-				if !strings.Contains(content, keyword) {
+				if !strings.Contains(m.Content, keyword) {
 					mustReply = false
 					break
 				}
 			}
-		case block2.MatchConditionPerfectMatch:
+		case serverDomainBlock.MatchConditionPerfectMatch:
 			// 完全一致の場合はキーワードは必ず1つのため、index[0]で指定しています
-			if content != block.Keyword[0] {
+			if m.Content != block.Keyword[0] {
 				mustReply = false
 			}
 		}
