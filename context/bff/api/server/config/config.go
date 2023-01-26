@@ -120,6 +120,12 @@ func postServerConfig(c *gin.Context) {
 	id := c.Query("id")
 	token := c.GetHeader("Token")
 
+	// リクエストを検証します
+	if id == "" || token == "" {
+		c.JSON(http.StatusBadRequest, "リクエストが不正です")
+		return
+	}
+
 	// クエリパラメータに指定されたサーバーです
 	guildName, err := guild.GetGuildName(session, id)
 	if err != nil {

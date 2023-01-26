@@ -87,6 +87,12 @@ func getServer(c *gin.Context) {
 	id := c.Query("id")
 	code := c.Query("code")
 
+	// リクエストを検証します
+	if id == "" || code == "" {
+		c.JSON(http.StatusBadRequest, "リクエストが不正です")
+		return
+	}
+
 	var (
 		token string
 	)
