@@ -1,10 +1,9 @@
 package server
 
 import (
+	"github.com/bwmarrin/discordgo"
 	"github.com/gin-gonic/gin"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/check"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/convert"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/initiate"
@@ -96,10 +95,6 @@ func getServer(c *gin.Context) {
 		return
 	}
 
-	var (
-		token string
-	)
-
 	// クエリパラメータに指定されたサーバーです
 	guildName, err := guild.GetGuildName(session, id)
 	if err != nil {
@@ -108,48 +103,21 @@ func getServer(c *gin.Context) {
 	}
 
 	// 認証されているユーザーかを検証します
-	{
-		tmpRes, err := v1.FindByID(ctx, id)
-		if err != nil {
-			message_send.SendErrMsg(session, errors.NewError("IDでサーバーを取得できません", err), guildName)
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
-
-		token, err = convert.CodeToToken(code)
-		if err != nil {
-			// codeの不正に関してはエラー通知しません
-			c.JSON(http.StatusUnauthorized, "codeが認証されていません")
-			return
-		}
-
-		userID, err := convert.TokenToDiscordID(token)
-		if err != nil {
-			message_send.SendErrMsg(session, errors.NewError("トークンをDiscordIDに変換できません", err), guildName)
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
-
-		guildOwnerID, err := guild.GetGuildOwnerID(session, id)
-		if err != nil {
-			message_send.SendErrMsg(session, errors.NewError("オーナーIDを取得できません", err), guildName)
-			c.JSON(http.StatusUnauthorized, "認証されていません")
-			return
-		}
-
-		if !(userID == conf.TotsumaruDiscordID || userID == guildOwnerID) {
-			ok, err := check.HasRole(session, id, userID, tmpRes.AdminRoleID)
-			if err != nil {
-				message_send.SendErrMsg(session, errors.NewError("ロールの所有確認に失敗しました", err), guildName)
-				c.JSON(http.StatusUnauthorized, "認証されていません")
-				return
-			}
-
-			if !ok {
-				c.JSON(http.StatusUnauthorized, "認証されていません")
-				return
-			}
-		}
+	token, err := convert.CodeToToken(code)
+	if err != nil {
+		// codeの不正に関してはエラー通知しません
+		c.JSON(http.StatusUnauthorized, "codeが認証されていません")
+		return
+	}
+	ok, err := shared.IsAuthorizedUser(ctx, session, id, token)
+	if err != nil {
+		message_send.SendErrMsg(session, errors.NewError("認証されているかの確認に失敗しました", err), guildName)
+		c.JSON(http.StatusUnauthorized, "認証されていません")
+		return
+	}
+	if !ok {
+		c.JSON(http.StatusUnauthorized, "認証されていません")
+		return
 	}
 
 	var (
@@ -188,27 +156,6 @@ func getServer(c *gin.Context) {
 		return
 	}
 
-	avatarURL, err := guild.GetAvatarURL(session, apiRes.ID)
-	if err != nil {
-		message_send.SendErrMsg(session, errors.NewError("アバターURLを取得できません", err), guildName)
-		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
-		return
-	}
-
-	allRoles, err := guild.GetAllRolesWithoutEveryone(session, apiRes.ID)
-	if err != nil {
-		message_send.SendErrMsg(session, errors.NewError("全てのロールを取得できません", err), guildName)
-		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
-		return
-	}
-
-	allChannels, err := guild.GetAllTextChannels(session, apiRes.ID)
-	if err != nil {
-		message_send.SendErrMsg(session, errors.NewError("全てのチャンネルを取得できません", err), guildName)
-		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
-		return
-	}
-
 	m, err := session.GuildMember(id, os.Getenv("DISCORD_APPLICATION_ID"))
 	if err != nil {
 		message_send.SendErrMsg(session, errors.NewError("botのMember情報を取得できません", err), guildName)
@@ -216,7 +163,41 @@ func getServer(c *gin.Context) {
 		return
 	}
 
+	res, err := createRes(session, apiRes, token, guildName, m.Nick)
+	if err != nil {
+		message_send.SendErrMsg(session, errors.NewError("レスポンスを作成できません", err), guildName)
+		c.JSON(http.StatusInternalServerError, "サーバーエラーが発生しました")
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+// レスポンスを作成します
+func createRes(
+	session *discordgo.Session,
+	apiRes v1.Res,
+	token string,
+	guildName string,
+	nickName string,
+) (Res, error) {
 	res := Res{}
+
+	avatarURL, err := guild.GetAvatarURL(session, apiRes.ID)
+	if err != nil {
+		return res, errors.NewError("アバターのURLを取得できません", err)
+	}
+
+	allRoles, err := guild.GetAllRolesWithoutEveryone(session, apiRes.ID)
+	if err != nil {
+		return res, errors.NewError("全てのロールを取得できません", err)
+	}
+
+	allChannels, err := guild.GetAllTextChannels(session, apiRes.ID)
+	if err != nil {
+		return res, errors.NewError("全てのチャンネルを取得できません", err)
+	}
+
 	res.ID = apiRes.ID
 	res.AdminRoleID = apiRes.AdminRoleID
 	// Comment
@@ -237,7 +218,7 @@ func getServer(c *gin.Context) {
 	res.AvatarURL = avatarURL
 	res.Role = []resRole{}
 	res.Channel = []resChannel{}
-	res.Nickname = m.Nick
+	res.Nickname = nickName
 
 	// レスポンスにブロックを追加します
 	for _, v := range apiRes.Comment.Block {
@@ -272,5 +253,5 @@ func getServer(c *gin.Context) {
 		res.Channel = append(res.Channel, tmpChannel)
 	}
 
-	c.JSON(http.StatusOK, res)
+	return res, nil
 }

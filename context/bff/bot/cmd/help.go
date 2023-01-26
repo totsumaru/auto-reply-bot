@@ -9,6 +9,7 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/redirect"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 	"net/url"
@@ -97,7 +98,7 @@ var CmdHelp = cmd.CMD{
 		discordLoginURL := fmt.Sprintf(
 			DiscordLoginURLTmpl,
 			os.Getenv("DISCORD_CLIENT_ID"),
-			url.QueryEscape(shared.CreateRedirectURL()),
+			url.QueryEscape(redirect.CreateRedirectURL()),
 			m.GuildID,
 		)
 

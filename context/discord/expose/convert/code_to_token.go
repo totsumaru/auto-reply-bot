@@ -2,7 +2,7 @@ package convert
 
 import (
 	"encoding/json"
-	"github.com/techstart35/auto-reply-bot/context/bff/shared"
+	"github.com/techstart35/auto-reply-bot/context/discord/expose/redirect"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 	"github.com/techstart35/auto-reply-bot/context/shared/map/seeker"
 	"log"
@@ -19,7 +19,7 @@ func CodeToToken(code string) (string, error) {
 	values.Add("client_secret", os.Getenv("DISCORD_CLIENT_SECRET"))
 	values.Add("grant_type", "authorization_code")
 	values.Add("code", code)
-	values.Add("redirect_uri", shared.CreateRedirectURL())
+	values.Add("redirect_uri", redirect.CreateRedirectURL())
 
 	req, err := http.NewRequest(
 		http.MethodPost,

@@ -1,13 +1,9 @@
 package config
 
 import (
-	"context"
 	"github.com/bwmarrin/discordgo"
 	"github.com/gin-gonic/gin"
 	"github.com/techstart35/auto-reply-bot/context/bff/shared"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/check"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
-	"github.com/techstart35/auto-reply-bot/context/discord/expose/convert"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/info/guild"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/initiate"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
@@ -134,7 +130,7 @@ func postServerConfig(c *gin.Context) {
 	}
 
 	// 認証されているユーザーかを検証します
-	ok, err := isAuthorizedUser(ctx, session, id, token)
+	ok, err := shared.IsAuthorizedUser(ctx, session, id, token)
 	if err != nil {
 		message_send.SendErrMsg(session, errors.NewError("認証されているかの確認に失敗しました", err), guildName)
 		c.JSON(http.StatusUnauthorized, "認証されていません")
@@ -199,37 +195,6 @@ func postServerConfig(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, res)
-}
-
-// 認証されているユーザーかを検証します
-func isAuthorizedUser(ctx context.Context, s *discordgo.Session, id, token string) (bool, error) {
-	tmpRes, err := v1.FindByID(ctx, id)
-	if err != nil {
-		return false, errors.NewError("IDでサーバーを取得できません", err)
-	}
-
-	userID, err := convert.TokenToDiscordID(token)
-	if err != nil {
-		return false, errors.NewError("TokenをDiscordIDに変換できません", err)
-	}
-
-	guildOwnerID, err := guild.GetGuildOwnerID(s, id)
-	if err != nil {
-		return false, errors.NewError("ギルドのオーナーを取得できません", err)
-	}
-
-	// Dev/サーバーオーナー であればtrueを返します
-	if userID == conf.TotsumaruDiscordID || userID == guildOwnerID {
-		return true, nil
-	}
-
-	// botの操作ロールを持っているかを判別します
-	ok, err := check.HasRole(s, id, userID, tmpRes.AdminRoleID)
-	if err != nil {
-		return false, errors.NewError("ロールの所有確認に失敗しました", err)
-	}
-
-	return ok, nil
 }
 
 // ServerコンテキストへのAPIリクエストを作成します
