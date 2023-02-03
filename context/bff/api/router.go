@@ -5,6 +5,7 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/bff/api/server"
 	"github.com/techstart35/auto-reply-bot/context/bff/api/server/config"
 	"github.com/techstart35/auto-reply-bot/context/bff/api/server/nickname"
+	"github.com/techstart35/auto-reply-bot/context/bff/api/server/permission/channels"
 )
 
 // ルートを設定します
@@ -13,6 +14,7 @@ func RegisterRouter(e *gin.Engine) {
 	server.Server(e)
 	config.ServerConfig(e)
 	nickname.Nickname(e)
+	channels.ServerPermissionChannels(e)
 }
 
 // ルートです

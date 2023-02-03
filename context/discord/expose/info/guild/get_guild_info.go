@@ -74,6 +74,45 @@ func GetAllRolesWithoutEveryone(s *discordgo.Session, guildID string) (map[strin
 	return res, nil
 }
 
+// 全てのロールをDiscord-goの構造体で返します
+//
+// @everyoneも含みます
+func GetAllRolesByRow(s *discordgo.Session, guildID string) ([]*discordgo.Role, error) {
+	res := make([]*discordgo.Role, 0)
+
+	guild, err := s.Guild(guildID)
+	if err != nil {
+		return res, errors.NewError("ギルドを取得できません", err)
+	}
+
+	for _, role := range guild.Roles {
+		res = append(res, role)
+	}
+
+	return res, nil
+}
+
+// 全てのロールをDiscord-goの構造体で返します
+//
+// @everyoneは除外します
+func GetAllRolesWithoutEveryoneByRow(s *discordgo.Session, guildID string) ([]*discordgo.Role, error) {
+	res := make([]*discordgo.Role, 0)
+
+	guild, err := s.Guild(guildID)
+	if err != nil {
+		return res, errors.NewError("ギルドを取得できません", err)
+	}
+
+	for _, role := range guild.Roles {
+		// @everyoneは除外します
+		if role.ID != guildID {
+			res = append(res, role)
+		}
+	}
+
+	return res, nil
+}
+
 // 全てのテキストチャンネルを取得します
 //
 // チャンネルID:チャンネル名 のmapを返します。
@@ -93,6 +132,25 @@ func GetAllTextChannels(s *discordgo.Session, guildID string) (map[string]string
 		// テキストチャンネルのみ追加します
 		if channel.Type == discordgo.ChannelTypeGuildText {
 			res[channel.ID] = channel.Name
+		}
+	}
+
+	return res, nil
+}
+
+// 全てのテキストチャンネルをDiscord-goの構造体で返します
+func GetAllTextChannelsByRow(s *discordgo.Session, guildID string) ([]*discordgo.Channel, error) {
+	res := make([]*discordgo.Channel, 0)
+
+	channels, err := s.GuildChannels(guildID)
+	if err != nil {
+		return res, errors.NewError("チャンネル一覧を取得できません", err)
+	}
+
+	for _, channel := range channels {
+		// テキストチャンネルのみ追加します
+		if channel.Type == discordgo.ChannelTypeGuildText {
+			res = append(res, channel)
 		}
 	}
 
