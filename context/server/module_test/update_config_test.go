@@ -26,12 +26,13 @@ func TestUpdateConfig(t *testing.T) {
 
 		// テスト対象のAPIをコールします
 		blockReq1 := v1.BlockReq{
-			Name:           "foo",
-			Keyword:        []string{"k1", "k2"},
-			Reply:          []string{"r1", "r2"},
-			MatchCondition: block.MatchConditionAllContain,
-			IsRandom:       true,
-			IsEmbed:        true,
+			Name:             "foo",
+			Keyword:          []string{"k1", "k2"},
+			Reply:            []string{"r1", "r2"},
+			MatchCondition:   block.MatchConditionAllContain,
+			LimitedChannelID: []string{"ch1"},
+			IsRandom:         true,
+			IsEmbed:          true,
 		}
 
 		req := v1.Req{}
@@ -63,12 +64,13 @@ func TestUpdateConfig(t *testing.T) {
 		}
 
 		expectBlockRes := v1.BlockRes{
-			Name:           blockReq1.Name,
-			Keyword:        blockReq1.Keyword,
-			Reply:          blockReq1.Reply,
-			MatchCondition: blockReq1.MatchCondition,
-			IsRandom:       blockReq1.IsRandom,
-			IsEmbed:        blockReq1.IsEmbed,
+			Name:             blockReq1.Name,
+			Keyword:          blockReq1.Keyword,
+			Reply:            blockReq1.Reply,
+			MatchCondition:   blockReq1.MatchCondition,
+			LimitedChannelID: blockReq1.LimitedChannelID,
+			IsRandom:         blockReq1.IsRandom,
+			IsEmbed:          blockReq1.IsEmbed,
 		}
 
 		if !reflect.DeepEqual(res.Comment.Block, []v1.BlockRes{expectBlockRes}) {

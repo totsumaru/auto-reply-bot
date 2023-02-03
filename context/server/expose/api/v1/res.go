@@ -29,12 +29,13 @@ type Res struct {
 
 // ブロックのレスポンスです
 type BlockRes struct {
-	Name           string
-	Keyword        []string
-	Reply          []string
-	MatchCondition string
-	IsRandom       bool
-	IsEmbed        bool
+	Name             string
+	Keyword          []string
+	Reply            []string
+	MatchCondition   string
+	LimitedChannelID []string
+	IsRandom         bool
+	IsEmbed          bool
 }
 
 // レスポンスを作成します
@@ -51,11 +52,17 @@ func CreateRes(m map[string]interface{}) (Res, error) {
 			rep = append(rep, seeker.Str(r, []string{"value"}))
 		}
 
+		limitedChID := make([]string, 0)
+		for _, chID := range seeker.Slice(bl, []string{"limited_channel_id"}) {
+			limitedChID = append(limitedChID, seeker.Str(chID, []string{"value"}))
+		}
+
 		b := BlockRes{}
 		b.Name = seeker.Str(bl, []string{"name", "value"})
 		b.Keyword = kw
 		b.Reply = rep
 		b.MatchCondition = seeker.Str(bl, []string{"match_condition", "value"})
+		b.LimitedChannelID = limitedChID
 		b.IsRandom = seeker.Bool(bl, []string{"is_random"})
 		b.IsEmbed = seeker.Bool(bl, []string{"is_embed"})
 

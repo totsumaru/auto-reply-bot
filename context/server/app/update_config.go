@@ -29,12 +29,13 @@ type Req struct {
 
 // ブロックのリクエストです
 type BlockReq struct {
-	Name           string
-	Keyword        []string
-	Reply          []string
-	MatchCondition string
-	IsRandom       bool
-	IsEmbed        bool
+	Name             string
+	Keyword          []string
+	Reply            []string
+	MatchCondition   string
+	LimitedChannelID []string
+	IsRandom         bool
+	IsEmbed          bool
 }
 
 // 全ての設定を更新します
@@ -96,11 +97,23 @@ func (a *App) UpdateConfig(serverID string, req Req) (string, error) {
 			return "", errors.NewError("一致条件を作成できません", err)
 		}
 
+		// 限定起動するチャンネルID
+		limitedChID := make([]model.ChannelID, 0)
+		for _, ch := range bReq.LimitedChannelID {
+			chID, err := model.NewChannelID(ch)
+			if err != nil {
+				return "", errors.NewError("チャンネルIDを作成できません", err)
+			}
+
+			limitedChID = append(limitedChID, chID)
+		}
+
 		bl, err := block.NewBlock(
 			name,
 			keyword,
 			reply,
 			matchCondition,
+			limitedChID,
 			bReq.IsRandom,
 			bReq.IsEmbed,
 		)

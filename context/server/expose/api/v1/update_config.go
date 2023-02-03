@@ -32,12 +32,13 @@ type Req struct {
 
 // ブロックのリクエストです
 type BlockReq struct {
-	Name           string
-	Keyword        []string
-	Reply          []string
-	MatchCondition string
-	IsRandom       bool
-	IsEmbed        bool
+	Name             string
+	Keyword          []string
+	Reply            []string
+	MatchCondition   string
+	LimitedChannelID []string
+	IsRandom         bool
+	IsEmbed          bool
 }
 
 // 設定を更新します
@@ -65,29 +66,16 @@ func UpdateConfig(
 		return res, errors.NewError("クエリーを初期化できません", err)
 	}
 
-	appBlockReq := make([]app.BlockReq, 0)
-	for _, v := range req.Comment.BlockReq {
-		bl := app.BlockReq{
-			Name:           v.Name,
-			Keyword:        v.Keyword,
-			Reply:          v.Reply,
-			MatchCondition: v.MatchCondition,
-			IsRandom:       v.IsRandom,
-			IsEmbed:        v.IsEmbed,
-		}
-
-		appBlockReq = append(appBlockReq, bl)
-	}
-
 	blockReqs := make([]app.BlockReq, 0)
 	for _, br := range req.Comment.BlockReq {
 		bReq := app.BlockReq{
-			Name:           br.Name,
-			Keyword:        br.Keyword,
-			Reply:          br.Reply,
-			MatchCondition: br.MatchCondition,
-			IsRandom:       br.IsRandom,
-			IsEmbed:        br.IsEmbed,
+			Name:             br.Name,
+			Keyword:          br.Keyword,
+			Reply:            br.Reply,
+			MatchCondition:   br.MatchCondition,
+			LimitedChannelID: br.LimitedChannelID,
+			IsRandom:         br.IsRandom,
+			IsEmbed:          br.IsEmbed,
 		}
 		blockReqs = append(blockReqs, bReq)
 	}

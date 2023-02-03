@@ -45,6 +45,20 @@ func Reply(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	for _, block := range storeRes.Comment.Block {
+		// 起動するチャンネルが限定されている場合
+		if len(block.LimitedChannelID) > 0 {
+			// 限定されているチャンネルをMapに格納します
+			limitedChIDMap := map[string]bool{} // boolは読み捨ててください
+			for _, chID := range block.LimitedChannelID {
+				limitedChIDMap[chID] = true
+			}
+
+			// 限定されているチャンネル以外の場合はここで終了します
+			if _, ok := limitedChIDMap[m.ChannelID]; !ok {
+				return
+			}
+		}
+
 		mustReply := true
 
 		switch block.MatchCondition {

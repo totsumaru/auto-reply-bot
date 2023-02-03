@@ -2,6 +2,7 @@ package block
 
 import (
 	"encoding/json"
+	"github.com/techstart35/auto-reply-bot/context/server/domain/model"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
 )
 
@@ -11,16 +12,20 @@ const (
 
 	// 1つのブロックに設定できる返信の上限数です
 	ReplyMaxAmount = 10
+
+	// 1つのブロックに設定できる限定発動チャンネルの上限数です
+	LimitedChannelIDMaxAmount = 3
 )
 
 // ブロックです
 type Block struct {
-	name           Name
-	keyword        []Keyword
-	reply          []Reply
-	matchCondition MatchCondition
-	isRandom       bool // 返信のランダムフラグ
-	isEmbed        bool // 埋め込みフラグ
+	name             Name              // 表示名
+	keyword          []Keyword         // キーワード
+	reply            []Reply           // 返信
+	matchCondition   MatchCondition    // 一致条件(完全一致,部分一致など)
+	limitedChannelID []model.ChannelID // 自動返信はこのチャンネルでのみ発動(任意)
+	isRandom         bool              // 返信のランダムフラグ
+	isEmbed          bool              // 埋め込みフラグ
 }
 
 // ブロックを作成します
@@ -29,6 +34,7 @@ func NewBlock(
 	kw []Keyword,
 	r []Reply,
 	matchCondition MatchCondition,
+	limitedChannelID []model.ChannelID,
 	isRandom bool,
 	isEmbed bool,
 ) (Block, error) {
@@ -37,6 +43,7 @@ func NewBlock(
 	b.keyword = kw
 	b.reply = r
 	b.matchCondition = matchCondition
+	b.limitedChannelID = limitedChannelID
 	b.isRandom = isRandom
 	b.isEmbed = isEmbed
 
@@ -67,6 +74,11 @@ func (b Block) MatchCondition() MatchCondition {
 	return b.matchCondition
 }
 
+// ここでのみ起動するチャンネルIDを取得します
+func (b Block) LimitedChannelID() []model.ChannelID {
+	return b.limitedChannelID
+}
+
 // ランダムフラグを取得します
 func (b Block) IsRandom() bool {
 	return b.isRandom
@@ -85,6 +97,10 @@ func (b Block) validate() error {
 
 	if len(b.reply) > ReplyMaxAmount || len(b.reply) == 0 {
 		return errors.NewError("返信の数が不正です")
+	}
+
+	if len(b.limitedChannelID) > LimitedChannelIDMaxAmount {
+		return errors.NewError("限定起動のチャンネル数が不正です")
 	}
 
 	// 同じキーワードが設定できないように制限
@@ -119,19 +135,21 @@ func (b Block) validate() error {
 // 構造体をJSONに変換します
 func (b Block) MarshalJSON() ([]byte, error) {
 	j := struct {
-		Name           Name           `json:"name"`
-		Keyword        []Keyword      `json:"keyword"`
-		Reply          []Reply        `json:"reply"`
-		MatchCondition MatchCondition `json:"match_condition"`
-		IsRandom       bool           `json:"is_random"`
-		IsEmbed        bool           `json:"is_embed"`
+		Name             Name              `json:"name"`
+		Keyword          []Keyword         `json:"keyword"`
+		Reply            []Reply           `json:"reply"`
+		MatchCondition   MatchCondition    `json:"match_condition"`
+		LimitedChannelID []model.ChannelID `json:"limited_channel_id"`
+		IsRandom         bool              `json:"is_random"`
+		IsEmbed          bool              `json:"is_embed"`
 	}{
-		Name:           b.name,
-		Keyword:        b.keyword,
-		Reply:          b.reply,
-		MatchCondition: b.matchCondition,
-		IsRandom:       b.isRandom,
-		IsEmbed:        b.isEmbed,
+		Name:             b.name,
+		Keyword:          b.keyword,
+		Reply:            b.reply,
+		MatchCondition:   b.matchCondition,
+		LimitedChannelID: b.limitedChannelID,
+		IsRandom:         b.isRandom,
+		IsEmbed:          b.isEmbed,
 	}
 
 	bb, err := json.Marshal(j)
@@ -145,12 +163,13 @@ func (b Block) MarshalJSON() ([]byte, error) {
 // JSONを構造体に変換します
 func (b *Block) UnmarshalJSON(bb []byte) error {
 	j := &struct {
-		Name           Name           `json:"name"`
-		Keyword        []Keyword      `json:"keyword"`
-		Reply          []Reply        `json:"reply"`
-		MatchCondition MatchCondition `json:"match_condition"`
-		IsRandom       bool           `json:"is_random"`
-		IsEmbed        bool           `json:"is_embed"`
+		Name             Name              `json:"name"`
+		Keyword          []Keyword         `json:"keyword"`
+		Reply            []Reply           `json:"reply"`
+		MatchCondition   MatchCondition    `json:"match_condition"`
+		LimitedChannelID []model.ChannelID `json:"limited_channel_id"`
+		IsRandom         bool              `json:"is_random"`
+		IsEmbed          bool              `json:"is_embed"`
 	}{}
 
 	if err := json.Unmarshal(bb, j); err != nil {
@@ -161,6 +180,7 @@ func (b *Block) UnmarshalJSON(bb []byte) error {
 	b.keyword = j.Keyword
 	b.reply = j.Reply
 	b.matchCondition = j.MatchCondition
+	b.limitedChannelID = j.LimitedChannelID
 	b.isRandom = j.IsRandom
 	b.isEmbed = j.IsEmbed
 

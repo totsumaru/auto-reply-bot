@@ -40,12 +40,13 @@ type ReqBody struct {
 
 // ブロックのリクエストです
 type blockReq struct {
-	Name           string   `json:"name"`
-	Keyword        []string `json:"keyword"`
-	Reply          []string `json:"reply"`
-	MatchCondition string   `json:"match_condition"`
-	IsRandom       bool     `json:"is_random"`
-	IsEmbed        bool     `json:"is_embed"`
+	Name             string   `json:"name"`
+	Keyword          []string `json:"keyword"`
+	Reply            []string `json:"reply"`
+	MatchCondition   string   `json:"match_condition"`
+	LimitedChannelID []string `json:"limited_channel_id"`
+	IsRandom         bool     `json:"is_random"`
+	IsEmbed          bool     `json:"is_embed"`
 }
 
 // レスポンスです
@@ -77,12 +78,13 @@ type Res struct {
 
 // ブロックのレスポンスです
 type resBlock struct {
-	Name           string   `json:"name"`
-	Keyword        []string `json:"keyword"`
-	Reply          []string `json:"reply"`
-	MatchCondition string   `json:"match_condition"`
-	IsRandom       bool     `json:"is_random"`
-	IsEmbed        bool     `json:"is_embed"`
+	Name             string   `json:"name"`
+	Keyword          []string `json:"keyword"`
+	Reply            []string `json:"reply"`
+	MatchCondition   string   `json:"match_condition"`
+	LimitedChannelID []string `json:"limited_channel_id"`
+	IsRandom         bool     `json:"is_random"`
+	IsEmbed          bool     `json:"is_embed"`
 }
 
 // ロールのレスポンスです
@@ -207,6 +209,7 @@ func castReqBodyToAPIReq(reqBody *ReqBody) (v1.Req, error) {
 		apiBlockReq.Keyword = rb.Keyword
 		apiBlockReq.Reply = rb.Reply
 		apiBlockReq.MatchCondition = rb.MatchCondition
+		apiBlockReq.LimitedChannelID = rb.LimitedChannelID
 		apiBlockReq.IsRandom = rb.IsRandom
 		apiBlockReq.IsEmbed = rb.IsEmbed
 
@@ -277,6 +280,7 @@ func createRes(s *discordgo.Session, apiRes v1.Res, guildName string) (Res, erro
 		blockRes.Keyword = v.Keyword
 		blockRes.Reply = v.Reply
 		blockRes.MatchCondition = v.MatchCondition
+		blockRes.LimitedChannelID = v.LimitedChannelID
 		blockRes.IsRandom = v.IsRandom
 		blockRes.IsEmbed = v.IsEmbed
 
