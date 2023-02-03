@@ -55,12 +55,22 @@ func (c Comment) validate() error {
 	}
 
 	// 同じチャンネルIDが入っていたらエラーを返します
-	chID := map[string]bool{}
+	ignoreChID := map[string]bool{}
 	for _, v := range c.ignoreChannelID {
-		if _, ok := chID[v.String()]; ok {
+		if _, ok := ignoreChID[v.String()]; ok {
 			return errors.NewError("同じチャンネルIDが含まれています")
 		}
-		chID[v.String()] = true
+		ignoreChID[v.String()] = true
+	}
+
+	// ignoreChannelIDと各ブロックの限定起動チャンネルのIDが重複している場合はエラーを返します
+	// ↑のchIDを流用します
+	for _, b := range c.block {
+		for _, limitedChID := range b.LimitedChannelID() {
+			if _, ok := ignoreChID[limitedChID.String()]; ok {
+				return errors.NewError("無視するチャンネルと限定起動のチャンネルが重複しています")
+			}
+		}
 	}
 
 	return nil
