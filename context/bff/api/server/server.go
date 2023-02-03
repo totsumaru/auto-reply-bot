@@ -50,12 +50,13 @@ type Res struct {
 
 // ブロックのレスポンスです
 type resBlock struct {
-	Name           string   `json:"name"`
-	Keyword        []string `json:"keyword"`
-	Reply          []string `json:"reply"`
-	MatchCondition string   `json:"match_condition"`
-	IsRandom       bool     `json:"is_random"`
-	IsEmbed        bool     `json:"is_embed"`
+	Name             string   `json:"name"`
+	Keyword          []string `json:"keyword"`
+	Reply            []string `json:"reply"`
+	MatchCondition   string   `json:"match_condition"`
+	LimitedChannelID []string `json:"limited_channel_id"`
+	IsRandom         bool     `json:"is_random"`
+	IsEmbed          bool     `json:"is_embed"`
 }
 
 // ロールのレスポンスです
@@ -227,6 +228,7 @@ func createRes(
 		blockRes.Keyword = v.Keyword
 		blockRes.Reply = v.Reply
 		blockRes.MatchCondition = v.MatchCondition
+		blockRes.LimitedChannelID = v.LimitedChannelID
 		blockRes.IsRandom = v.IsRandom
 		blockRes.IsEmbed = v.IsEmbed
 
