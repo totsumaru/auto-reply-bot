@@ -84,7 +84,7 @@ func URL(s *discordgo.Session, m *discordgo.MessageCreate) {
 				fixedContent = strings.Replace(
 					fixedContent,
 					findURL,
-					fmt.Sprintf("~~%s~~", strings.Replace(findURL, "http", "h ttp", -1)),
+					fmt.Sprintf("%s", strings.Replace(findURL, "http", "h ttp", -1)),
 					-1,
 				)
 			}
