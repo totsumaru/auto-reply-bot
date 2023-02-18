@@ -81,12 +81,7 @@ func URL(s *discordgo.Session, m *discordgo.MessageCreate) {
 			// URLは 打ち消し線 + httpを無効 にして送信します
 			findURL := r.FindString(m.Content)
 			if findURL != "" {
-				fixedContent = strings.Replace(
-					fixedContent,
-					findURL,
-					fmt.Sprintf("%s", strings.Replace(findURL, "http", "h ttp", -1)),
-					-1,
-				)
+				fixedContent = strings.Replace(fixedContent, "http", "h ttp", -1)
 			}
 
 			req := message_send.SendMessageEmbedWithIconReq{
