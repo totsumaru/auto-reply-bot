@@ -59,7 +59,9 @@ func URL(s *discordgo.Session, m *discordgo.MessageUpdate) {
 
 		// 投稿されたチャンネルにメッセージを返します
 		{
+			// そのサーバーで許可されているリストをスライスに追加します
 			allowURLs := make([]string, 0)
+
 			if storeRes.Rule.URL.IsYoutubeAllow {
 				allowURLs = append(allowURLs, "YouTube")
 			}
@@ -78,15 +80,10 @@ func URL(s *discordgo.Session, m *discordgo.MessageUpdate) {
 
 			fixedContent := m.Content
 			r := regexp.MustCompile("https?://[\\w!?/+\\-_~;:.,*=&@#$%()'[\\]]+")
-			// URLは 打ち消し線 + httpを無効 にして送信します
+			// URLは httpを無効 にして送信します
 			findURL := r.FindString(m.Content)
 			if findURL != "" {
-				fixedContent = strings.Replace(
-					fixedContent,
-					findURL,
-					fmt.Sprintf("%s", strings.Replace(findURL, "http", "h ttp", -1)),
-					-1,
-				)
+				fixedContent = strings.Replace(fixedContent, "http", "h ttp", -1)
 			}
 
 			req := message_send.SendMessageEmbedWithIconReq{
