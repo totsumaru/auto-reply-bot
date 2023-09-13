@@ -1,12 +1,13 @@
 package shared
 
 import (
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/check"
 	"github.com/techstart35/auto-reply-bot/context/server/domain/model/server/rule"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
-	"strings"
 )
 
 // 不正URLが送信された時の削除後のメッセージです
