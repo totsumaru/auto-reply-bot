@@ -2,6 +2,9 @@ package message_create
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/techstart35/auto-reply-bot/context/bff/bot/handler/shared"
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/conf"
@@ -10,8 +13,6 @@ import (
 	"github.com/techstart35/auto-reply-bot/context/discord/expose/message_send"
 	v1 "github.com/techstart35/auto-reply-bot/context/server/expose/api/v1"
 	"github.com/techstart35/auto-reply-bot/context/shared/errors"
-	"regexp"
-	"strings"
 )
 
 // URL制限について確認します
@@ -93,7 +94,7 @@ func URL(s *discordgo.Session, m *discordgo.MessageCreate) {
 				Color:      conf.ColorGray,
 				Name:       m.Author.Username,
 				IconURL:    m.Author.AvatarURL(""),
-				FooterText: fmt.Sprintf("スキャム対策として、このサーバーでは%s以外のURLはbotが無効化しています。", allowURLs),
+				FooterText: fmt.Sprintf("スキャム対策として、このサーバーでは%s以外のURLはbotが無効化しています。(このサービスは2023年9月末で終了します。以降はAutoModで管理してください。)", allowURLs),
 			}
 			if err = message_send.SendMessageEmbedWithIcon(s, req); err != nil {
 				message_send.SendErrMsg(s, errors.NewError("埋め込みメッセージを送信できません", err), guildName)
